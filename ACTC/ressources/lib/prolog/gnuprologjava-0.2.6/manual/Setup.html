@@ -1,0 +1,68 @@
+<html lang="en">
+<head>
+<title>Setup - GNU Prolog for Java 0.2.6 Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="GNU Prolog for Java 0.2.6 Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Using-the-API.html#Using-the-API" title="Using the API">
+<link rel="prev" href="Using-the-API.html#Using-the-API" title="Using the API">
+<link rel="next" href="Constructing-Terms.html#Constructing-Terms" title="Constructing Terms">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This manual is for GNU Prolog for Java 0.2.6,
+which is a Java library for utilising Prolog.
+
+Copyright (C) 2010 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being ``A GNU Manual,'' and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     ``GNU Free Documentation License.''
+
+     (a) The FSF's Back-Cover Text is: ``You have the freedom to copy
+     and modify this GNU manual.''
+   -->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Setup"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Constructing-Terms.html#Constructing-Terms">Constructing Terms</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Using-the-API.html#Using-the-API">Using the API</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Using-the-API.html#Using-the-API">Using the API</a>
+<hr>
+</div>
+
+<h3 class="section">2.1 Setup</h3>
+
+<p>First construct a gnu.prolog.vm.Environment which is the core of the VM using <code>new Environment()</code>.
+
+   <p>Then load any prolog files you want to which define additional predicates etc using <code>environment.ensureLoaded(AtomTerm.get(``URL of file''))</code> for each file. Though if you already have an gnu.prolog.vm.AtomTerm representation of the file then you can use that.
+
+   <p>Instances of Terms should be got using their relevant <code>get(Type)</code> methods as we ensure only one gnu.prolog.term.Term instance for each distinct object they represent.
+
+   <p>Then you will need to create at least one gnu.prolog.vm.Interpreter which is used to execute goals. You do this using <code>environment.createInterpreter()</code>. You might want multiple Interpreters if you want to run goals in multiple threads.
+
+   <p>Having created it you need to use it to run the initialization of any files you have loaded by using <code>env.runInitialization(interpreter);</code>. This ensures the goals contained in any &ldquo;:- initialization(goal).&rdquo; or &ldquo;:- goal.&rdquo;s in the files you have loaded are run.
+
+   <p>At this point the setup is completed and you can start running goals. This is done using <code>interpreter.runOnce(Term);</code> where Term is the goal you want to execute. This does one execution of the goal and then stops. 
+The construction of Terms is explained in the next section. If you need something more complex than that then you will need to use <code>goal = interpreter.prepareGoal(goalTerm); int rc = interpreter.execute(goal)</code> and then depending on the value of rc possibly run <code>execute(goal)</code> again. If you stop running <code>execute(goal)</code> while rc is still SUCCESS then you need to run <code>interpreter.stop(goal)</code>.
+
+   </body></html>
+

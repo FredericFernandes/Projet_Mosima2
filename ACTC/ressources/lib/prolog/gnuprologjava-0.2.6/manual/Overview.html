@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+<title>Overview - GNU Prolog for Java 0.2.6 Manual</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="GNU Prolog for Java 0.2.6 Manual">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="index.html#Top" title="Top">
+<link rel="next" href="Using-the-API.html#Using-the-API" title="Using the API">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This manual is for GNU Prolog for Java 0.2.6,
+which is a Java library for utilising Prolog.
+
+Copyright (C) 2010 Free Software Foundation, Inc.
+
+     Permission is granted to copy, distribute and/or modify this
+     document under the terms of the GNU Free Documentation License,
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, with the Front-Cover Texts
+     being ``A GNU Manual,'' and with the Back-Cover Texts as in (a)
+     below.  A copy of the license is included in the section entitled
+     ``GNU Free Documentation License.''
+
+     (a) The FSF's Back-Cover Text is: ``You have the freedom to copy
+     and modify this GNU manual.''
+   -->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<a name="Overview"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Using-the-API.html#Using-the-API">Using the API</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="index.html#Top">Top</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">1 Overview</h2>
+
+<p>GNU Prolog for Java (GPJ) is a Java library (gnu.prolog) which allows the use of Prolog from within Java programs.  It supports part 1 of the ISO standard for Prolog with some extensions. It is licenced under the LGPLv3 which can be found in the COPYING and COPYING.LIBRARY files distributed with GNU Prolog for Java (GPJ) and published by the Free Software Foundation.
+
+   <p>For normal usage there are only a few classes which you will need to interact with. 
+gnu.prolog.vm.Environment which provides the core of the prolog environment. 
+gnu.prolog.vm.Interpreter which is what you use to run your prolog queries. 
+gnu.prolog.term which contains the various types of Prolog terms which exist and which you use to construct your prolog questions if you want answers (beyond SUCCESS, SUCCESS_LAST and FAIL).
+
+   <p>The use of the API is explained in the next chapter: <a href="Using-the-API.html#Using-the-API">Using the API</a>.
+
+   <p>If you wish to install GPJ then instructions are provided in the <a href="Installation.html#Installation">Installation</a> chapter.
+
+   <p>If you wish to extend GPJ by writing your own predicates (for example to allow prolog code to make calls into your Java code) then see the chapter on <a href="Extending.html#Extending">Extending</a> GPJ.
+
+   <p>Further documentation is provided in the README file and changes brought about by new versions will be detailed in the NEWS file. The <a href="http://www.gnu.org/software/gnuprologjava/api/ java API has javadoc based documentation">http://www.gnu.org/software/gnuprologjava/api/ java API has javadoc based documentation</a>.
+
+   <p>The gnu.prolog.demo package contains various example programs which use the API.
+
+   </body></html>
+
