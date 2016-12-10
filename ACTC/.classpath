@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/eventbus.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/j-ogg-oggd.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/j-ogg-vorbisd.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jbullet.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jglfont-core.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jinput.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-blender.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-core.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-desktop.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-effects.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-jbullet.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-jogg.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-lwjgl-natives.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-lwjgl.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-networking.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-niftygui.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-plugins.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-terrain.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jME3-testdata.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/joal.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/jogl-all.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/lwjgl.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/nifty-default-controls.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/nifty-examples.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/nifty-style-black.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/nifty.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/stack-alloc.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/vecmath.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jme/xmlpull-xpp3.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/jade/jade.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jade.tilab.com/doc/api"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="ressources/lib/prolog/jiprolog-4.1.5.1.jar" sourcepath="ressources/lib/prolog/jiprolog-4.1.5.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/ACTC/ressources/lib/prolog/jiprolog-4.1.5.1.jar!/com/ugos/jiprolog/resources"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="ressources/lib/prolog/gnuprologjava-0.2.6/gnuprologjava-0.2.6.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/ACTC/ressources/lib/prolog/gnuprologjava-0.2.6.zip!/api"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="ressources/lib/tools/sma-tools.jar"/>
+	<classpathentry kind="lib" path="ressources/lib/weka/weka-3-6-14/weka.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
