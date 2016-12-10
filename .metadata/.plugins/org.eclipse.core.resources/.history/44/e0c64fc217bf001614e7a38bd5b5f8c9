@@ -51,7 +51,6 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.SkyFactory;
 
-import app.CustomSimpleApplication;
 import dataStructures.tuple.Tuple2;
 import env.terrain.TerrainTools;
 
@@ -73,7 +72,7 @@ import com.jme3.scene.control.Control;
  * @author WonbinLIM
  *
  */
-public class Env extends CustomSimpleApplication /*implements ActionListener*/ {
+public class Env extends SimpleApplication /*implements ActionListener*/ {
 
 	private BulletAppState bulletAppState;
 	private RigidBodyControl landscape;
@@ -203,10 +202,9 @@ public class Env extends CustomSimpleApplication /*implements ActionListener*/ {
 		bulletAppState = new BulletAppState();
 	    stateManager.attach(bulletAppState);
 	    
-	    cam.setLocation(new Vector3f(0,-70,0));
-	    //cam.lookAt(new Vector3f(0,0,0), new Vector3f(0,0,0).normalize());
-	    cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
-		flyCam.setMoveSpeed(150);
+	    cam.setLocation(new Vector3f(0,150,0));
+	    cam.lookAt(new Vector3f(0,0,0), new Vector3f(0,0,0).normalize());
+		flyCam.setMoveSpeed(50);
 //		flyCam.setEnabled(false);
 		
 		

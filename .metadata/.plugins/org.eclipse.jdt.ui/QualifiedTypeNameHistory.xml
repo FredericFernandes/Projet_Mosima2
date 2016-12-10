@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="de.lessvoid.nifty.controls.dynamic.CustomControlCreator"/>
+<fullyQualifiedTypeName name="app.CustomSimpleApplication"/>
+</qualifiedTypeNameHistroy>
