@@ -177,7 +177,7 @@ public class Environment extends CustomSimpleApplication {
 
 
 		cam.setViewPort(0.0f, 1.0f, 0.6f, 1.0f);
-		cam.setLocation(new Vector3f(21.384611f, 20.78105f, 20.05727f));
+		cam.setLocation(new Vector3f(0.0f, -240.0f, 0.0f));
 		cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
 		flyCam.setMoveSpeed(150);
