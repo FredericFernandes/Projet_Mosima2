@@ -53,14 +53,13 @@ public class PlayerControl extends CharacterControl{
 				Vector3f dir = this.destination.subtract(this.spatial.getWorldTranslation());
 				
 				dir.setY(dir.getY()+10);
-				
 				setViewDirection(dir.clone().setY(0));
 				dir.normalizeLocal();
 				dir.multLocal(0.8f);
 //				dir.setY(terrain.getHeightmapHeight(new Vector2f(dir.x,dir.z))-252);
 				setWalkDirection(dir);
 				cam.setLocation(this.spatial.getWorldTranslation());
-				cam.lookAtDirection(dir, Vector3f.UNIT_Y);
+				cam.lookAtDirection(dir.clone().setY(0.0f), Vector3f.UNIT_Y);
 				
 			}
 			else {

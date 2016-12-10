@@ -39,8 +39,8 @@ public class BasicAgent extends AbstractAgent {
 
 		randomWalk = new RandomWalkBehaviour(this);
 		addBehaviour(randomWalk);
-		
-		System.out.println("the player "+this.getLocalName()+ " is started. Tag (0==enemy): " + friendorFoe);
+		String type = friendorFoe? "Agent":"Enemy";
+		System.out.println("the "+this.getLocalName()+ " is started. Type: " +type);
 		
 	}
 	

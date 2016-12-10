@@ -29,12 +29,12 @@ public class RandomWalkBehaviour extends TickerBehaviour {
 		Vector3f currentpos  = ((AbstractAgent)this.myAgent).getCurrentPosition();
 		Vector3f dest = ((AbstractAgent)this.myAgent).getDestination();
 		
-		AbstractAgent me = ((AbstractAgent)this.myAgent);
+	//	AbstractAgent me = ((AbstractAgent)this.myAgent);
 
-		if (this.myAgent.getLocalName().equals("Player1")) {
-			me.moveTo(new Vector3f(60,0,60));
-			// A faire : camera
-		}
+//		if (this.myAgent.getLocalName().equals("Player1")) {
+//			me.moveTo(new Vector3f(60,0,60));
+//			// A faire : camera
+//		}
 		
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
 			((AbstractAgent)this.myAgent).randomMove();
@@ -45,7 +45,7 @@ public class RandomWalkBehaviour extends TickerBehaviour {
 			else {
 				enemy = "Player1";
 			}
-			((AbstractAgent)this.myAgent).randomAction(enemy);
+			//((AbstractAgent)this.myAgent).randomAction(enemy);
 		}
 		
 	}
