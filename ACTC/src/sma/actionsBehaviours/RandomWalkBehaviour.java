@@ -17,34 +17,16 @@ public class RandomWalkBehaviour extends TickerBehaviour {
 	private static final long serialVersionUID = 1L;
 	
 	public RandomWalkBehaviour(final AbstractAgent myagent) {
-		// TODO Auto-generated constructor stub
 		super(myagent, 200);
 	}
 
 	@Override
 	protected void onTick() {
 		
-		Environment env = (Environment) this.myAgent.getArguments()[0];
-		// TODO Auto-generated method stub
 		Vector3f currentpos  = ((AbstractAgent)this.myAgent).getCurrentPosition();
-		Vector3f dest = ((AbstractAgent)this.myAgent).getDestination();
-		
-	//	AbstractAgent me = ((AbstractAgent)this.myAgent);
-
-//		if (this.myAgent.getLocalName().equals("Player1")) {
-//			me.moveTo(new Vector3f(60,0,60));
-//			// A faire : camera
-//		}
-		
+		Vector3f dest = ((AbstractAgent)this.myAgent).getDestination();	
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
 			((AbstractAgent)this.myAgent).randomMove();
-			String enemy = "";
-			if (this.myAgent.getLocalName().equals("Player1")) {
-				enemy = "Player2";
-			}
-			else {
-				enemy = "Player1";
-			}
 			//((AbstractAgent)this.myAgent).randomAction(enemy);
 		}
 		

@@ -2,4 +2,7 @@
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="de.lessvoid.nifty.controls.dynamic.CustomControlCreator"/>
 <fullyQualifiedTypeName name="app.CustomSimpleApplication"/>
+<fullyQualifiedTypeName name="sma.agents.ChaseAgent"/>
+<fullyQualifiedTypeName name="sma.actionsBehaviours.ChaseBehaviour"/>
+<fullyQualifiedTypeName name="sma.actionsBehaviours.LegalActions.LegalAction"/>
 </qualifiedTypeNameHistroy>

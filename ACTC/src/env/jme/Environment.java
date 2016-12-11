@@ -79,7 +79,8 @@ public class Environment extends CustomSimpleApplication {
 
 	private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int FIELDOFVIEW = 35;
+	private final int VIEW_SHOOTABLE = 45;
+	private final int VIEW_DISTANCE = 145;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
 
@@ -607,7 +608,7 @@ public class Environment extends CustomSimpleApplication {
 			Vector3f target = getCurrentPosition(enemy);
 			Vector3f dir = target.subtract(origin).normalize();
 
-			if (isVisible(agent, enemy)) {
+			if (isVisibleForShoot(agent, enemy)) {
 				//				// arrow
 				//				((Arrow) (marks.get(agent).getMesh())).setArrowExtent(Vector3f.UNIT_Z.mult(origin.distance(closest.getContactPoint())));
 				//				marks.get(agent).setLocalTranslation(closest.getContactPoint());
@@ -658,7 +659,7 @@ public class Environment extends CustomSimpleApplication {
 	 * @param enemy the name of the target agent.
 	 * @return true if the enemy is visible, false if not.
 	 */
-	private boolean isVisible(String agent, String enemy) {
+	private boolean isVisibleForShoot(String agent, String enemy) {
 		Vector3f origin = getCurrentPosition(agent);
 		Vector3f target = getCurrentPosition(enemy);
 		Vector3f dir = target.subtract(origin).normalize();
@@ -669,13 +670,13 @@ public class Environment extends CustomSimpleApplication {
 
 		if (((Camera)players.get(agent).getUserData("cam")).contains(bv).equals(FrustumIntersect.Inside)) {
 			Ray ray = new Ray(origin, dir);
-			ray.setLimit(FIELDOFVIEW);
+			ray.setLimit(VIEW_SHOOTABLE);
 			CollisionResults results = new CollisionResults();
 			shootables.collideWith(ray, results);
 			if (results.size()>1) {
 				CollisionResult closest = results.getCollision(1);
 				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
-					if (origin.distance(target)<=FIELDOFVIEW) {
+					if (origin.distance(target)<=VIEW_SHOOTABLE) {
 						return true;
 					}
 				}
@@ -683,7 +684,31 @@ public class Environment extends CustomSimpleApplication {
 		}
 		return false;
 	}
+	public boolean isVisible(String agent, String enemy) {
+		Vector3f origin = getCurrentPosition(agent);
+		Vector3f target = getCurrentPosition(enemy);
+		Vector3f dir = target.subtract(origin).normalize();
 
+		BoundingVolume bv = players.get(enemy).getWorldBound();
+		bv.setCheckPlane(0);
+
+
+		if (((Camera)players.get(agent).getUserData("cam")).contains(bv).equals(FrustumIntersect.Inside)) {
+			Ray ray = new Ray(origin, dir);
+			ray.setLimit(VIEW_DISTANCE);
+			CollisionResults results = new CollisionResults();
+			shootables.collideWith(ray, results);
+			if (results.size()>1) {
+				CollisionResult closest = results.getCollision(1);
+				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
+					if (origin.distance(target)<=VIEW_DISTANCE) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * -Local use only-
@@ -705,7 +730,7 @@ public class Environment extends CustomSimpleApplication {
 		final Ray ray = new Ray();
 		ray.setOrigin(point);
 		ray.setDirection(direction);
-		ray.setLimit(FIELDOFVIEW);
+		ray.setLimit(VIEW_SHOOTABLE);
 		shootables.collideWith(ray, res);
 
 		if (res.size() > 0) {
@@ -815,7 +840,7 @@ public class Environment extends CustomSimpleApplication {
 		//	    System.out.println("maxDepth : "+maxDepth);
 		//	    System.out.println("Consistency : "+heights.size()*1./nb);
 		//	    System.out.println("\n");
-		return new Situation(FIELDOFVIEW,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
+		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 
 
@@ -871,12 +896,12 @@ public class Environment extends CustomSimpleApplication {
 			Vector3f enemyPosition = getCurrentPosition(enemy);
 			Vector3f dir = enemyPosition.subtract(agentPosition).normalize();
 			Ray ray = new Ray(agentPosition, dir);
-			ray.setLimit(FIELDOFVIEW);
+			ray.setLimit(VIEW_SHOOTABLE);
 			CollisionResults results = new CollisionResults();
 			shootables.collideWith(ray, results);
 			CollisionResult closest = results.getCollision(1);
 
-			if (agentPosition.distance(enemyPosition)<=FIELDOFVIEW && closest.getGeometry().equals(players.get(enemy))) {
+			if (agentPosition.distance(enemyPosition)<=VIEW_SHOOTABLE && closest.getGeometry().equals(players.get(enemy))) {
 				res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
 			}
 		}
