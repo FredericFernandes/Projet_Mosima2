@@ -6,4 +6,8 @@
 <fullyQualifiedTypeName name="sma.actionsBehaviours.ChaseBehaviour"/>
 <fullyQualifiedTypeName name="sma.actionsBehaviours.LegalActions.LegalAction"/>
 <fullyQualifiedTypeName name="com.jme3.math.Vector3f"/>
+<fullyQualifiedTypeName name="org.jpl7.Query"/>
+<fullyQualifiedTypeName name="org.jpl7.Term"/>
+<fullyQualifiedTypeName name="prologTest.jpltest"/>
+<fullyQualifiedTypeName name="prologTest.FishingTest"/>
 </qualifiedTypeNameHistroy>

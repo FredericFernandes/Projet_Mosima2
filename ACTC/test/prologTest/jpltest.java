@@ -358,29 +358,31 @@ public class jpltest {
 			return "(QueryThread id=" + id_ + ")";
 		}
 
-		public void run() {
+		public synchronized void run() {
 			Query query = new Query("p", new Term[] { new Atom("a"), new Atom("a") });
-			for (int i = 0; i < 10; ++i) {
-				try {
-					query.hasSolution();
-				} catch (JPLException e) {
-					System.out.println("Threaded p(a, a) threw exception: " + e);
-					System.exit(1);
-				}
-				System.out.print(id_);
-				Thread.yield();
-			}
-			for (int i = 0; i < 10; ++i) {
-				try {
-					while (query.hasMoreSolutions()) {
-						Thread.yield();
-						query.nextSolution();
+			synchronized (query) {
+				for (int i = 0; i < 10; ++i) {
+					try {
+						query.hasSolution();
+					} catch (JPLException e) {
+						System.out.println("Threaded p(a, a) threw exception: " + e);
+						System.exit(1);
 					}
-				} catch (JPLException e) {
-					System.out.println("Threaded p(a, a) threw exception: " + e);
-					System.exit(1);
+					//System.out.print(id_);
+					Thread.yield();
 				}
-				System.out.print(id_);
+				for (int i = 0; i < 10; ++i) {
+					try {
+						while (query.hasMoreSolutions()) {
+							Thread.yield();
+							query.nextSolution();
+						}
+					} catch (JPLException e) {
+						System.out.println("Threaded p(a, a) threw exception: " + e);
+						System.exit(1);
+					}
+					//System.out.print(id_);
+				}
 			}
 		}
 	}
