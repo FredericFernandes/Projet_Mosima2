@@ -164,14 +164,14 @@ public class Environment extends CustomSimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
-		
+
 		stateManager.attach(bulletAppState);
 
 
 		bulletNode = new Node("bullet");
 		shootables = new Node("shootables");
 		notshootables= new Node("notshootables");
-		
+
 		rootNode.attachChild(bulletNode);
 		rootNode.attachChild(shootables);
 		rootNode.attachChild(notshootables);
@@ -355,6 +355,7 @@ public class Environment extends CustomSimpleApplication {
 				ViewPort view2 = renderManager.createMainView("Bottom Right", cam2);
 				view2.setClearFlags(true, true, true);
 				view2.attachScene(rootNode);
+				randomMove(agentName);
 			}
 
 			player.setMaterial(mat);
@@ -372,7 +373,7 @@ public class Environment extends CustomSimpleApplication {
 			this.players.put(agentName, player);
 			this.lastActions.put(agentName, null);
 
-			randomMove(agentName);
+			
 
 			// test for arrow
 			//		    Arrow arrow = new Arrow(Vector3f.UNIT_Z.mult(2));
@@ -489,6 +490,20 @@ public class Environment extends CustomSimpleApplication {
 		return false;
 	}
 
+	public synchronized void move(String agent, String agentTarget) {
+		if (!players.containsKey(agent) || !players.containsKey(agentTarget)) return ;
+
+		Vector3f origin = getCurrentPosition(agent);
+		Vector3f target = getCurrentPosition(agentTarget);
+		Vector3f dir = target.subtract(origin).normalize();
+		moveDirection(agent,dir);
+	}
+	
+	private synchronized void moveDirection(String agent, Vector3f dir) {
+		if (!players.containsKey(agent)) return ;
+		Spatial player = players.get(agent);
+		player.getControl(PlayerControl.class).move(dir);
+	}
 
 	/**
 	 * -Local use only-

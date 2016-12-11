@@ -22,12 +22,15 @@ public class ChaseBehaviour extends TickerBehaviour {
 		Vector3f currentpos  = him.getCurrentPosition();
 		Vector3f dest = him.getDestination();	
 		
-		if(him.seeMyEnemy()){
-			System.out.println(" I see my target ");
+		if(him.seeEnemy()){
+			//System.out.println(" I see my target ");
+			him.moveToEnemy();
+			//him.directionalMoveEnemy();
 		}
 		
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
-			him.randomMove();		
+			//him.randomMove();		
+			him.randomMoveAction();
 		}
 		
 		

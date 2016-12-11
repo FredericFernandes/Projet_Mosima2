@@ -5,4 +5,5 @@
 <fullyQualifiedTypeName name="sma.agents.ChaseAgent"/>
 <fullyQualifiedTypeName name="sma.actionsBehaviours.ChaseBehaviour"/>
 <fullyQualifiedTypeName name="sma.actionsBehaviours.LegalActions.LegalAction"/>
+<fullyQualifiedTypeName name="com.jme3.math.Vector3f"/>
 </qualifiedTypeNameHistroy>
