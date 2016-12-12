@@ -45,6 +45,7 @@ public class PerlinAlgorithm {
 				rand.v[i][j] = (float)new Random().nextInt(maxAlt);
 			}
 		}
+		
 		/*save rand[][]*/
 		
 		

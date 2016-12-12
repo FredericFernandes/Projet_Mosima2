@@ -1,11 +1,12 @@
 package sma;
 
 
+import java.util.List;
 import java.util.Random;
 
 import com.jme3.math.Vector3f;
 
-
+import dataStructures.tuple.Tuple2;
 import env.EnvironmentManager;
 import env.jme.Environment;
 import env.jme.Situation;
@@ -34,10 +35,10 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 		return realEnv.getDestination(getLocalName());
 	}
 
-	public Situation observeAgents() {
+	public Situation observeMap() {
 		return realEnv.observe(getLocalName(), 10);
 	}
-
+	
 	public void lookAt(LegalAction direction) {
 		realEnv.lookAt(getLocalName(), direction);
 	}
@@ -122,5 +123,8 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	}
 	public void directionalMoveEnemy(){
 		realEnv.move(getLocalName(), enemy);
+	}
+	public List<Tuple2<Vector3f, String>> observeAgents() {
+		return realEnv.observeAgents(getLocalName());
 	}
 }

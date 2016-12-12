@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import com.jme3.app.FlyCamAppState;
-import com.jme3.app.SimpleApplication;
 import com.jme3.bounding.BoundingBox;
 
 import com.jme3.bounding.BoundingVolume;
@@ -31,8 +29,11 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.Camera.FrustumIntersect;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
@@ -67,7 +68,7 @@ public class Environment extends CustomSimpleApplication {
 
 	private Node shootables;
 	private Node notshootables;
-
+	private Node arrows;
 	//	private Camera cam1;
 	//	private Camera cam2;
 
@@ -83,7 +84,7 @@ public class Environment extends CustomSimpleApplication {
 	private final int VIEW_DISTANCE = 145;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
-
+	private float time;
 	//	private Spatial player1;
 	//	private PlayerControl physicsPlayer1;
 	//	private Node player1Node;
@@ -92,7 +93,7 @@ public class Environment extends CustomSimpleApplication {
 	//	private CharacterControl physicsPlayer2;
 	//	private Node player2Node;
 
-
+	private ArrayList<Geometry> listArrow; 
 
 	public static void main(String[] args) {
 		Environment.launchRandom(64);
@@ -167,15 +168,17 @@ public class Environment extends CustomSimpleApplication {
 
 		stateManager.attach(bulletAppState);
 
-
+		
 		bulletNode = new Node("bullet");
 		shootables = new Node("shootables");
 		notshootables= new Node("notshootables");
 
+		arrows = new Node("arrows");
+
 		rootNode.attachChild(bulletNode);
 		rootNode.attachChild(shootables);
 		rootNode.attachChild(notshootables);
-
+		rootNode.attachChild(arrows);
 
 		cam.setViewPort(0.0f, 1.0f, 0.6f, 1.0f);
 		cam.setLocation(new Vector3f(0.0f, -240.0f, 0.0f));
@@ -184,11 +187,33 @@ public class Environment extends CustomSimpleApplication {
 		flyCam.setMoveSpeed(150);
 		//flyCam.setEnabled(false);
 
-		makeTerrain();;
+		makeTerrain();
+
+		listArrow = new ArrayList<Geometry>();
+		//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
+		//		arrow.setLineWidth(10); // make arrow thicker
+		//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
+
 	}
 
 	//	int cpt = 0;
 	public void simpleUpdate(float tpf) {
+		time+=tpf;	
+		if(time>=1.0f){ // wait 1sec
+			time=0;
+			arrows.detachAllChildren();
+		}
+		
+		ArrayList<Geometry>tmpList = new ArrayList<Geometry>(listArrow);
+		for(Geometry geo : tmpList){
+			if (geo!=null){
+				arrows.attachChild(geo);
+			}
+			
+		}
+		listArrow.clear();
+
+
 		//		if (cpt==0) {
 		//			deployAgent("a1", "player");
 		//			moveTo("a1", new Vector3f(0, terrain.getHeightmapHeight(new Vector2f(0,-10))-252f, -10));
@@ -315,7 +340,7 @@ public class Environment extends CustomSimpleApplication {
 
 			// we make the function wait 5 seconds for letting the objets be created before.
 			try {
-				wait(5000);
+				wait(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -327,7 +352,6 @@ public class Environment extends CustomSimpleApplication {
 			//			Spatial player = assetManager.loadModel("assets/Models/GR-75MediumTransport.blend");
 			Box b  = new Box(2, 2, 2);
 			Geometry player = new Geometry("Box", b);
-
 			player.setModelBound(new BoundingBox());
 			player.updateModelBound();
 			player.updateGeometricState();
@@ -373,7 +397,7 @@ public class Environment extends CustomSimpleApplication {
 			this.players.put(agentName, player);
 			this.lastActions.put(agentName, null);
 
-			
+
 
 			// test for arrow
 			//		    Arrow arrow = new Arrow(Vector3f.UNIT_Z.mult(2));
@@ -498,7 +522,7 @@ public class Environment extends CustomSimpleApplication {
 		Vector3f dir = target.subtract(origin).normalize();
 		moveDirection(agent,dir);
 	}
-	
+
 	private synchronized void moveDirection(String agent, Vector3f dir) {
 		if (!players.containsKey(agent)) return ;
 		Spatial player = players.get(agent);
@@ -631,7 +655,6 @@ public class Environment extends CustomSimpleApplication {
 				//				q.lookAt(dir, Vector3f.UNIT_Z);
 				//				marks.get(agent).setLocalRotation(q);
 				//				rootNode.attachChild(marks.get(agent));
-
 				//				System.out.println("closest: "+closest.getGeometry().getWorldTranslation());
 				//				System.out.println("target: "+players.get(enemy).getWorldTranslation());
 				this.lastActions.put(agent, LegalAction.SHOOT);
@@ -747,7 +770,11 @@ public class Environment extends CustomSimpleApplication {
 		ray.setDirection(direction);
 		ray.setLimit(VIEW_SHOOTABLE);
 		shootables.collideWith(ray, res);
-
+		
+		Arrow arrow = new Arrow(direction);
+		arrow.setLineWidth(1); // make arrow thicker
+		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(point);
+		
 		if (res.size() > 0) {
 			int size = 0;
 			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
@@ -786,7 +813,8 @@ public class Environment extends CustomSimpleApplication {
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
-
+		System.out.println("getWidth() : "+camera.getWidth());
+		System.out.println("getHeight() : "+camera.getHeight());
 		for (int x = 0; x < camera.getWidth() / 2; x = x + rayDistance) {
 			for (int y = 0; y < camera.getHeight() / 2; y = y + rayDistance) {
 
@@ -847,14 +875,14 @@ public class Environment extends CustomSimpleApplication {
 				}	      
 			}
 		}
-		//	    System.out.println("agent's altitude : "+agentPos.y);
-		//	    System.out.println("lowest : "+lowestPosition);
-		//	    System.out.println("highest : "+highestPosition);
-		//	    System.out.println("average :"+sum+"/"+nb+"="+sum/nb);
-		//	    System.out.println("fieldOfView : "+nb);
-		//	    System.out.println("maxDepth : "+maxDepth);
-		//	    System.out.println("Consistency : "+heights.size()*1./nb);
-		//	    System.out.println("\n");
+		System.out.println("agent's altitude : "+agentPos.y);
+		System.out.println("lowest : "+lowestPosition);
+		System.out.println("highest : "+highestPosition);
+		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+		System.out.println("fieldOfView : "+nb);
+		System.out.println("maxDepth : "+maxDepth);
+		System.out.println("Consistency : "+heights.size()*1./nb);
+		System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 
@@ -902,7 +930,7 @@ public class Environment extends CustomSimpleApplication {
 	 * @param agentName name of the agent who observes.
 	 * @return a list of all the agents around the observer.
 	 */
-	private synchronized List<Tuple2<Vector3f, String>> observeAgents(String agentName) {
+	public synchronized List<Tuple2<Vector3f, String>> observeAgents(String agentName) {
 
 		List<Tuple2<Vector3f, String>> res = new ArrayList();
 
@@ -910,14 +938,16 @@ public class Environment extends CustomSimpleApplication {
 		for (String enemy : players.keySet()) {
 			Vector3f enemyPosition = getCurrentPosition(enemy);
 			Vector3f dir = enemyPosition.subtract(agentPosition).normalize();
+
 			Ray ray = new Ray(agentPosition, dir);
 			ray.setLimit(VIEW_SHOOTABLE);
 			CollisionResults results = new CollisionResults();
 			shootables.collideWith(ray, results);
-			CollisionResult closest = results.getCollision(1);
-
-			if (agentPosition.distance(enemyPosition)<=VIEW_SHOOTABLE && closest.getGeometry().equals(players.get(enemy))) {
-				res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
+			if (results.size()>1) {
+				CollisionResult closest = results.getCollision(1);
+				if (agentPosition.distance(enemyPosition)<=VIEW_SHOOTABLE && closest.getGeometry().equals(players.get(enemy))) {
+					res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
+				}
 			}
 		}
 		return res;
@@ -1016,5 +1046,16 @@ public class Environment extends CustomSimpleApplication {
 		debris.getParticleInfluencer().setVelocityVariation(.60f);
 		rootNode.attachChild(debris);
 		debris.emitAllParticles();
+	}
+
+	private Geometry putShape(String name, Mesh shape, ColorRGBA color){
+		Geometry g = new Geometry(name, shape);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		//mat.getAdditionalRenderState().setWireframe(true);
+		mat.setColor("Color", color);
+		g.setMaterial(mat);
+		//rootNode.attachChild(g);
+		listArrow.add(g);
+		return g;
 	}
 }

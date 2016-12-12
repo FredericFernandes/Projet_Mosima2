@@ -32,6 +32,7 @@ public class Layer {
 		this.size = size;
 		this.persistence = persistence;
 		
+		
 	}
 	
 	/**

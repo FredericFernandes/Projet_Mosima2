@@ -26,6 +26,7 @@ public class ChaseBehaviour extends TickerBehaviour {
 			//System.out.println(" I see my target ");
 			him.moveToEnemy();
 			//him.directionalMoveEnemy();
+			him.observeMap();
 		}
 		
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
