@@ -10,4 +10,6 @@
 <fullyQualifiedTypeName name="org.jpl7.Term"/>
 <fullyQualifiedTypeName name="prologTest.jpltest"/>
 <fullyQualifiedTypeName name="prologTest.FishingTest"/>
+<fullyQualifiedTypeName name="prologTest.PrologCalls"/>
+<fullyQualifiedTypeName name="java.util.Random"/>
 </qualifiedTypeNameHistroy>

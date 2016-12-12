@@ -17,6 +17,7 @@ public class FishingTest {
 
 		FishingTest test = new FishingTest();
 		test.test1();
+	
 	}
 	private void test1(){
 
@@ -30,7 +31,6 @@ public class FishingTest {
 		}
 		boolean res = new Query("fish(tom)").hasSolution() ;
 		System.out.println("fish(tom) : "+ res);
-
 
 
 	}
