@@ -36,7 +36,7 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	}
 
 	public Situation observeMap() {
-		return realEnv.observe(getLocalName(), 10);
+		return realEnv.observe2(getLocalName(), 10);
 	}
 	
 	public void lookAt(LegalAction direction) {
