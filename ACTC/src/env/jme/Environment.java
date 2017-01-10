@@ -180,7 +180,7 @@ public class Environment extends CustomSimpleApplication {
 		rootNode.attachChild(notshootables);
 		rootNode.attachChild(arrows);
 
-		cam.setViewPort(0.0f, 1.0f, 0.6f, 1.0f);
+		cam.setViewPort(0.0f, 1.0f, 0.0f, 1.0f);
 		cam.setLocation(new Vector3f(0.0f, -240.0f, 0.0f));
 		cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
@@ -364,9 +364,9 @@ public class Environment extends CustomSimpleApplication {
 				cam1.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam1);
 				physicsPlayer.setCam(cam1);
-				ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
-				view1.setClearFlags(true, true, true);
-				view1.attachScene(rootNode);
+				//ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
+				//view1.setClearFlags(true, true, true);
+				//view1.attachScene(rootNode);
 			}
 			else {
 				mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -376,10 +376,10 @@ public class Environment extends CustomSimpleApplication {
 				cam2.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam2);
 				physicsPlayer.setCam(cam2);
-				ViewPort view2 = renderManager.createMainView("Bottom Right", cam2);
-				view2.setClearFlags(true, true, true);
-				view2.attachScene(rootNode);
-				randomMove(agentName);
+				//ViewPort view2 = renderManager.createMainView("Bottom Right", cam2);
+				//view2.setClearFlags(true, true, true);
+				//view2.attachScene(rootNode);
+				//randomMove(agentName);
 			}
 
 			player.setMaterial(mat);
