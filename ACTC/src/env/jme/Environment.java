@@ -180,7 +180,7 @@ public class Environment extends CustomSimpleApplication {
 		rootNode.attachChild(notshootables);
 		rootNode.attachChild(arrows);
 
-		cam.setViewPort(0.0f, 1.0f, 0.0f, 1.0f);
+		cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
 		cam.setLocation(new Vector3f(0.0f, -240.0f, 0.0f));
 		cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
@@ -199,7 +199,7 @@ public class Environment extends CustomSimpleApplication {
 	//	int cpt = 0;
 	public void simpleUpdate(float tpf) {
 		time+=tpf;	
-		if(time>=1.0f){ // wait 1sec
+		if(time>=0.25f){ // wait 1sec
 			time=0;
 			arrows.detachAllChildren();
 		}
@@ -364,9 +364,9 @@ public class Environment extends CustomSimpleApplication {
 				cam1.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam1);
 				physicsPlayer.setCam(cam1);
-				//ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
-				//view1.setClearFlags(true, true, true);
-				//view1.attachScene(rootNode);
+				ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
+				view1.setClearFlags(true, true, true);
+				view1.attachScene(rootNode);
 			}
 			else {
 				mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -376,9 +376,9 @@ public class Environment extends CustomSimpleApplication {
 				cam2.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam2);
 				physicsPlayer.setCam(cam2);
-				//ViewPort view2 = renderManager.createMainView("Bottom Right", cam2);
-				//view2.setClearFlags(true, true, true);
-				//view2.attachScene(rootNode);
+				ViewPort view2 = renderManager.createMainView("Bottom Right", cam2);
+				view2.setClearFlags(true, true, true);
+				view2.attachScene(rootNode);
 				//randomMove(agentName);
 			}
 
@@ -771,8 +771,47 @@ public class Environment extends CustomSimpleApplication {
 		ray.setLimit(VIEW_SHOOTABLE);
 		shootables.collideWith(ray, res);
 		
+		
+		if (res.size() > 0) {
+			int size = 0;
+			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
+				size++;
+			}
+			if (res.size()>size+1) {
+				size++;
+			}
+			CollisionResult closest = res.getCollision(size);
+			//		    System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
+			if (closest.getGeometry().getClass().equals(TerrainPatch.class)) {
+				//		    	System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
+				Arrow arrow = new Arrow(direction);
+				arrow.setLineWidth(10); // make arrow thicker
+				putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(closest.getContactPoint());
+				return closest.getContactPoint();
+			}		    
+		}
+		return null;
+	}
+	
+	private Vector3f intersects2(String ag, Camera camera, final float xOffset, final float yOffset) {
+		final Vector3f point = players.get(ag).getWorldTranslation().clone();
+		final Vector3f direction = camera.getDirection().clone();
+		float[] coords = new float[3];
+		float angle = players.get(ag).getLocalRotation().toAngles(coords)[1];
+		float cos = (float)Math.cos(angle);
+		float sin = (float)Math.sin(angle);
+		direction.setX(direction.getX() + xOffset * cos);
+		direction.setY(direction.getY() + yOffset * sin);
+
+		CollisionResults res = new CollisionResults();
+		res.clear();
+		final Ray ray = new Ray();
+		ray.setOrigin(point);
+		ray.setDirection(direction);
+		ray.setLimit(VIEW_SHOOTABLE);
+		shootables.collideWith(ray, res);
 		Arrow arrow = new Arrow(direction);
-		arrow.setLineWidth(1); // make arrow thicker
+		arrow.setLineWidth(2); // make arrow thicker
 		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(point);
 		
 		if (res.size() > 0) {
@@ -787,6 +826,7 @@ public class Environment extends CustomSimpleApplication {
 			//		    System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
 			if (closest.getGeometry().getClass().equals(TerrainPatch.class)) {
 				//		    	System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
+				
 				return closest.getContactPoint();
 			}		    
 		}
@@ -885,7 +925,62 @@ public class Environment extends CustomSimpleApplication {
 		System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
+	
+	
+	public Situation observe2(String ag, int rayDistance) {
+		Camera camera = ((Camera)players.get(ag).getUserData("cam"));
+		Vector3f agentPos = players.get(ag).getWorldTranslation();
+		float highest = -255;
+		Vector3f highestPosition = null;
+		float lowest = 255;
+		Vector3f lowestPosition = null;
+		int nb = 0;
+		float sum = 0;
+		float maxDepth = 0;
+		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
+		System.out.println("getWidth() : "+camera.getWidth());
+		System.out.println("getHeight() : "+camera.getHeight());
+		for (int x = 0; x <= 5; x++) {
+			for (int y = 0; y <=5; y++) {
+
+				ArrayList<Vector3f> points = new ArrayList<Vector3f>();
+				Vector3f x1 = intersects2(ag, camera, x, y);
+				if (x1 != null) { 
+					points.add(x1);
+					nb++;
+					sum += x1.y;
+					if (x1.distance(agentPos) > maxDepth) {
+						maxDepth = x1.distance(agentPos);
+					}
+					heights.put(x1.y, 1);
+
+				}
+				if (points.size() > 0) {
+					Vector3f max = maxAltitude((ArrayList<Vector3f>)points.clone());
+					if (max.y > highest) {
+						highestPosition = max;
+						highest = max.y;
+					}
+					Vector3f min = minAltitude((ArrayList<Vector3f>)points.clone());
+					if (min.y < lowest) {
+						lowestPosition = min;
+						lowest = min.y;
+					}
+				}	      
+			}
+		}
+		
+		System.out.println("agent's altitude : "+agentPos.y);
+		System.out.println("lowest : "+lowestPosition);
+		System.out.println("highest : "+highestPosition);
+		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+		System.out.println("fieldOfView : "+nb);
+		System.out.println("maxDepth : "+maxDepth);
+		System.out.println("Consistency : "+heights.size()*1./nb);
+		System.out.println("\n");
+		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
+	}
 
 	/**
 	 * -Local use only-
