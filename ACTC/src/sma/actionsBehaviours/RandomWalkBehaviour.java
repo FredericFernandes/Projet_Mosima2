@@ -2,29 +2,29 @@ package sma.actionsBehaviours;
 
 import com.jme3.math.Vector3f;
 import jade.core.behaviours.TickerBehaviour;
+import princ.Principal;
 import sma.AbstractAgent;
 
-public class RandomWalkBehaviour extends TickerBehaviour {
+public class RandomWalkBehaviour extends SecureTickerBehaviour {
 
 	/**
 	 * 
 	 */
+	
 	private static final long serialVersionUID = 1L;
 	
 	public RandomWalkBehaviour(final AbstractAgent myagent) {
-		super(myagent, 200);
+		super(myagent);
 	}
 
 	@Override
-	protected void onTick() {
-		
+	protected void Tick() {
 		Vector3f currentpos  = ((AbstractAgent)this.myAgent).getCurrentPosition();
 		Vector3f dest = ((AbstractAgent)this.myAgent).getDestination();	
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
 			((AbstractAgent)this.myAgent).randomMove();
 			//((AbstractAgent)this.myAgent).randomAction(enemy);
 		}
-		
 	}
 	
 	private boolean approximativeEqualsCoordinates(Vector3f a, Vector3f b) {

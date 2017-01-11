@@ -25,6 +25,7 @@ import com.jme3.scene.Spatial.CullHint;
 import com.jme3.system.JmeContext.Type;
 
 import input.CustomFlyByCamera;
+import princ.Principal;
 
 import com.jme3.system.JmeSystem;
 
@@ -92,11 +93,11 @@ public abstract class CustomSimpleApplication extends SimpleApplication  {
 					f = stateManager.getState(FlyCamAppState.class).getClass().getDeclaredField("flyCam");
 					f.setAccessible(true);
 					f.set(stateManager.getState(FlyCamAppState.class), flyCam);
-					
+
 				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
-	
+
 				//stateManager.getState(FlyCamAppState.class).setCamera( flyCam );
 			}
 
@@ -122,16 +123,16 @@ public abstract class CustomSimpleApplication extends SimpleApplication  {
 				f1 = stateManager.getState(StatsAppState.class).getClass().getDeclaredField("guiFont");
 				f1.setAccessible(true);
 				f1.set(stateManager.getState(StatsAppState.class), guiFont);
-				
+
 				f2 = stateManager.getState(StatsAppState.class).getClass().getDeclaredField("fpsText");
 				f2.setAccessible(true);
 				f2.set(stateManager.getState(StatsAppState.class), new BitmapText(guiFont, false));
-				
+
 			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
 
-			
+
 			//stateManager.getState(StatsAppState.class).setFont(guiFont);
 			fpsText = stateManager.getState(StatsAppState.class).getFpsText();
 		}
@@ -225,5 +226,13 @@ public abstract class CustomSimpleApplication extends SimpleApplication  {
 			listener = new Listener();
 			audioRenderer.setListener(listener);
 		}
+	}
+	@Override
+	public void update() {
+		//System.out.println("start update ");
+		Principal.entrantLock.lock();
+		super.update();
+		//System.out.println("end update ");
+		Principal.entrantLock.unlock();
 	}
 }

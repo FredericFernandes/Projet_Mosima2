@@ -3,8 +3,9 @@ package princ;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-import com.jme3.app.SimpleApplication;
 
 import env.jme.Environment;
 import jade.core.Profile;
@@ -24,21 +25,34 @@ public class Principal {
 	private static List<AgentController> agentList;// agents's ref
 	private static Environment env;// static ref of the real environment
 
+	public static Lock entrantLock;
 	public static void main(String[] args){
 
+		entrantLock = new ReentrantLock();
 		//0) Create the environment
 
-		//env = Environment.launchRandom(128);
-		
-		env = Environment.launch("circleMap2");
-		
-		emptyPlatform(containerList);
+		env = Environment.launchRandom(64);
+		//env = Environment.launch("circleMap2");
+		synchronized(env){
+			try {
+				System.out.println("-- Wait JMonkey ending loading !! ");
+				env.wait();
+				//env.setPauseOnLostFocus(true);
+				System.out.println("Start Jade ");
+				emptyPlatform(containerList);
+				
+				//2) create agents and add them to the platform.
+				agentList=createAgents(containerList);
 
-		//2) create agents and add them to the platform.
-		agentList=createAgents(containerList);
-
-		//3) launch agents
-		startAgents(agentList);
+				//3) launch agents
+				startAgents(agentList);
+				//env.setPauseOnLostFocus(false);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		
 		
 	}

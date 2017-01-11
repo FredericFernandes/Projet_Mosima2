@@ -1,6 +1,7 @@
 package env.jme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -45,6 +46,7 @@ import com.jme3.texture.Texture.WrapMode;
 import app.CustomSimpleApplication;
 import dataStructures.tuple.Tuple2;
 import env.terrain.TerrainTools;
+import princ.Principal;
 import sma.actionsBehaviours.LegalActions;
 import sma.actionsBehaviours.LegalActions.LegalAction;
 
@@ -84,6 +86,7 @@ public class Environment extends CustomSimpleApplication {
 	private final int VIEW_DISTANCE = 145;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
+	private final float yOffsetMAP = -200f;
 	private float time;
 	//	private Spatial player1;
 	//	private PlayerControl physicsPlayer1;
@@ -93,7 +96,7 @@ public class Environment extends CustomSimpleApplication {
 	//	private CharacterControl physicsPlayer2;
 	//	private Node player2Node;
 
-	private ArrayList<Geometry> listArrow; 
+	//private ArrayList<Geometry> listArrow; 
 
 	public static void main(String[] args) {
 		Environment.launchRandom(64);
@@ -165,54 +168,52 @@ public class Environment extends CustomSimpleApplication {
 
 	@Override
 	public void simpleInitApp() {
+		synchronized(this){
+			stateManager.attach(bulletAppState);
 
-		stateManager.attach(bulletAppState);
 
-		
-		bulletNode = new Node("bullet");
-		shootables = new Node("shootables");
-		notshootables= new Node("notshootables");
+			bulletNode = new Node("bullet");
+			shootables = new Node("shootables");
+			notshootables= new Node("notshootables");
 
-		arrows = new Node("arrows");
+			arrows = new Node("arrows");
 
-		rootNode.attachChild(bulletNode);
-		rootNode.attachChild(shootables);
-		rootNode.attachChild(notshootables);
-		rootNode.attachChild(arrows);
+			rootNode.attachChild(bulletNode);
+			rootNode.attachChild(shootables);
+			rootNode.attachChild(notshootables);
+			rootNode.attachChild(arrows);
 
-		cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
-		cam.setLocation(new Vector3f(0.0f, -240.0f, 0.0f));
-		cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
+			cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
+			cam.setLocation(new Vector3f(0.0f, 0.0f, 0.0f));
+			cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
-		flyCam.setMoveSpeed(150);
-		//flyCam.setEnabled(false);
+			flyCam.setMoveSpeed(150);
+			//flyCam.setEnabled(false);
 
-		makeTerrain();
+			makeTerrain();
 
-		listArrow = new ArrayList<Geometry>();
-		//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
-		//		arrow.setLineWidth(10); // make arrow thicker
-		//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
+			//listArrow = new ArrayList<Geometry>();
+			//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
+			//		arrow.setLineWidth(10); // make arrow thicker
+			//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
 
+			/***
+			 * NOW JMonkey is ready for Jade 
+			 */
+			this.notify();
+		}
 	}
 
-	//	int cpt = 0;
+
+	@Override
 	public void simpleUpdate(float tpf) {
+		//Principal.entrantLock.lock();
 		time+=tpf;	
-		if(time>=0.25f){ // wait 1sec
+		if(time>=0.25f){ // wait n sec
 			time=0;
 			arrows.detachAllChildren();
 		}
-		
-		ArrayList<Geometry>tmpList = new ArrayList<Geometry>(listArrow);
-		for(Geometry geo : tmpList){
-			if (geo!=null){
-				arrows.attachChild(geo);
-			}
-			
-		}
-		listArrow.clear();
-
+		//Principal.entrantLock.unlock();
 
 		//		if (cpt==0) {
 		//			deployAgent("a1", "player");
@@ -298,7 +299,7 @@ public class Environment extends CustomSimpleApplication {
 		terrain = new TerrainQuad("my terrain", patchSize, this.heightmap_tuplet.getFirst()+1, this.heightmap_tuplet.getSecond());
 		/** 4. We give the terrain its material, position & scale it, and attach it. */
 		terrain.setMaterial(mat_terrain);
-		terrain.setLocalTranslation(0, -255, 0);
+		terrain.setLocalTranslation(0, yOffsetMAP, 0);
 		terrain.setLocalScale(2f, 1f, 2f);
 		terrain.setName("TERRAIN");
 
@@ -313,7 +314,6 @@ public class Environment extends CustomSimpleApplication {
 
 		//	    terrainNode.attachChild(terrain);
 		shootables.attachChild(terrain);
-
 	}
 
 
@@ -330,21 +330,29 @@ public class Environment extends CustomSimpleApplication {
 			return false;
 		}
 		else {
-
+			int val = terrain.getTerrainSize()-15;
+			if(playertype.equals("player"))
+					val=-val;
+			Vector3f startPostion = new Vector3f(val,-10.0f,val);
+			
 			SphereCollisionShape capsuleShape = new SphereCollisionShape(2);
 			PlayerControl physicsPlayer = new PlayerControl(capsuleShape, 0.05f, terrain);
 			physicsPlayer.setJumpSpeed(5);
 			physicsPlayer.setFallSpeed(500);
 			physicsPlayer.setGravity(500);
 			physicsPlayer.setMaxSlope(500f);
+			//System.out.println(terrain.getTerrainSize());
+			//physicsPlayer.setPhysicsLocation(new Vector3f(terrain.getTerrainSize(),5.0f,terrain.getTerrainSize()));
+			physicsPlayer.setPhysicsLocation(startPostion);
 
-			// we make the function wait 5 seconds for letting the objets be created before.
+			// we make the function wait 1 seconds for letting the objets be created before.
 			try {
-				wait(3000);
+				wait(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
 			getPhysicsSpace().add(physicsPlayer);
 
 
@@ -353,6 +361,7 @@ public class Environment extends CustomSimpleApplication {
 			Box b  = new Box(2, 2, 2);
 			Geometry player = new Geometry("Box", b);
 			player.setModelBound(new BoundingBox());
+			player.setLocalTranslation(startPostion);
 			player.updateModelBound();
 			player.updateGeometricState();
 			//			Spatial player = assetManager.loadModel("Models/Test/BasicCubeLow.obj");
@@ -367,6 +376,7 @@ public class Environment extends CustomSimpleApplication {
 				ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
 				view1.setClearFlags(true, true, true);
 				view1.attachScene(rootNode);
+				
 			}
 			else {
 				mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -396,16 +406,6 @@ public class Environment extends CustomSimpleApplication {
 
 			this.players.put(agentName, player);
 			this.lastActions.put(agentName, null);
-
-
-
-			// test for arrow
-			//		    Arrow arrow = new Arrow(Vector3f.UNIT_Z.mult(2));
-			//		    Geometry mark = new Geometry("arrow", arrow);
-			//			Material m1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-			//			m1.setColor("Color", ColorRGBA.Green);
-			//			mark.setMaterial(m1);
-			//			marks.put(agentName, mark);
 		}
 		return true;
 	}
@@ -626,7 +626,7 @@ public class Environment extends CustomSimpleApplication {
 			int min = -max;
 			float randx = new Random().nextFloat()*(max - min) + min;
 			float randz = new Random().nextFloat()*(max - min) + min;
-			Vector3f dest = new Vector3f(randx, terrain.getHeightmapHeight(new Vector2f(randx, randz))-255f, randz);
+			Vector3f dest = new Vector3f(randx, terrain.getHeightmapHeight(new Vector2f(randx, randz))+yOffsetMAP, randz);
 			return moveTo(agent, dest);
 		}
 		return false;
@@ -770,8 +770,8 @@ public class Environment extends CustomSimpleApplication {
 		ray.setDirection(direction);
 		ray.setLimit(VIEW_SHOOTABLE);
 		shootables.collideWith(ray, res);
-		
-		
+
+
 		if (res.size() > 0) {
 			int size = 0;
 			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
@@ -784,15 +784,15 @@ public class Environment extends CustomSimpleApplication {
 			//		    System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
 			if (closest.getGeometry().getClass().equals(TerrainPatch.class)) {
 				//		    	System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
-				Arrow arrow = new Arrow(direction);
-				arrow.setLineWidth(10); // make arrow thicker
-				putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(closest.getContactPoint());
+				//Arrow arrow = new Arrow(direction);
+				//arrow.setLineWidth(10); // make arrow thicker
+				//putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(closest.getContactPoint());
 				return closest.getContactPoint();
 			}		    
 		}
 		return null;
 	}
-	
+
 	private Vector3f intersects2(String ag, Camera camera, final float xOffset, final float yOffset) {
 		final Vector3f point = players.get(ag).getWorldTranslation().clone();
 		final Vector3f direction = camera.getDirection().clone();
@@ -810,10 +810,9 @@ public class Environment extends CustomSimpleApplication {
 		ray.setDirection(direction);
 		ray.setLimit(VIEW_SHOOTABLE);
 		shootables.collideWith(ray, res);
-		Arrow arrow = new Arrow(direction);
-		arrow.setLineWidth(2); // make arrow thicker
-		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(point);
-		
+
+		addArrow(direction,point);
+
 		if (res.size() > 0) {
 			int size = 0;
 			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
@@ -826,7 +825,7 @@ public class Environment extends CustomSimpleApplication {
 			//		    System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
 			if (closest.getGeometry().getClass().equals(TerrainPatch.class)) {
 				//		    	System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
-				
+
 				return closest.getContactPoint();
 			}		    
 		}
@@ -844,7 +843,7 @@ public class Environment extends CustomSimpleApplication {
 	public Situation observe(String ag, int rayDistance) {
 		Camera camera = ((Camera)players.get(ag).getUserData("cam"));
 		Vector3f agentPos = players.get(ag).getWorldTranslation();
-		float highest = -255;
+		float highest = yOffsetMAP;
 		Vector3f highestPosition = null;
 		float lowest = 255;
 		Vector3f lowestPosition = null;
@@ -853,8 +852,8 @@ public class Environment extends CustomSimpleApplication {
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
-		System.out.println("getWidth() : "+camera.getWidth());
-		System.out.println("getHeight() : "+camera.getHeight());
+		//System.out.println("getWidth() : "+camera.getWidth());
+		//System.out.println("getHeight() : "+camera.getHeight());
 		for (int x = 0; x < camera.getWidth() / 2; x = x + rayDistance) {
 			for (int y = 0; y < camera.getHeight() / 2; y = y + rayDistance) {
 
@@ -915,22 +914,22 @@ public class Environment extends CustomSimpleApplication {
 				}	      
 			}
 		}
-		System.out.println("agent's altitude : "+agentPos.y);
-		System.out.println("lowest : "+lowestPosition);
-		System.out.println("highest : "+highestPosition);
-		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
-		System.out.println("fieldOfView : "+nb);
-		System.out.println("maxDepth : "+maxDepth);
-		System.out.println("Consistency : "+heights.size()*1./nb);
-		System.out.println("\n");
+		//		System.out.println("agent's altitude : "+agentPos.y);
+		//		System.out.println("lowest : "+lowestPosition);
+		//		System.out.println("highest : "+highestPosition);
+		//		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+		//		System.out.println("fieldOfView : "+nb);
+		//		System.out.println("maxDepth : "+maxDepth);
+		//		System.out.println("Consistency : "+heights.size()*1./nb);
+		//		System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
-	
-	
+
+
 	public Situation observe2(String ag, int rayDistance) {
 		Camera camera = ((Camera)players.get(ag).getUserData("cam"));
 		Vector3f agentPos = players.get(ag).getWorldTranslation();
-		float highest = -255;
+		float highest = yOffsetMAP;
 		Vector3f highestPosition = null;
 		float lowest = 255;
 		Vector3f lowestPosition = null;
@@ -939,8 +938,8 @@ public class Environment extends CustomSimpleApplication {
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
-		System.out.println("getWidth() : "+camera.getWidth());
-		System.out.println("getHeight() : "+camera.getHeight());
+		//System.out.println("getWidth() : "+camera.getWidth());
+		//System.out.println("getHeight() : "+camera.getHeight());
 		for (int x = 0; x <= 5; x++) {
 			for (int y = 0; y <=5; y++) {
 
@@ -970,15 +969,15 @@ public class Environment extends CustomSimpleApplication {
 				}	      
 			}
 		}
-		
-		System.out.println("agent's altitude : "+agentPos.y);
-		System.out.println("lowest : "+lowestPosition);
-		System.out.println("highest : "+highestPosition);
-		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
-		System.out.println("fieldOfView : "+nb);
-		System.out.println("maxDepth : "+maxDepth);
-		System.out.println("Consistency : "+heights.size()*1./nb);
-		System.out.println("\n");
+
+		//		System.out.println("agent's altitude : "+agentPos.y);
+		//		System.out.println("lowest : "+lowestPosition);
+		//		System.out.println("highest : "+highestPosition);
+		//		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+		//		System.out.println("fieldOfView : "+nb);
+		//		System.out.println("maxDepth : "+maxDepth);
+		//		System.out.println("Consistency : "+heights.size()*1./nb);
+		//		System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 
@@ -1143,14 +1142,18 @@ public class Environment extends CustomSimpleApplication {
 		debris.emitAllParticles();
 	}
 
-	private Geometry putShape(String name, Mesh shape, ColorRGBA color){
-		Geometry g = new Geometry(name, shape);
+	private void addArrow(Vector3f direction, Vector3f point){
+		Arrow arrow = new Arrow(direction);
+		arrow.setLineWidth(2); // make arrow thicker
+
+		Geometry g = new Geometry("arrow", arrow);
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		//mat.getAdditionalRenderState().setWireframe(true);
-		mat.setColor("Color", color);
+		mat.setColor("Color", ColorRGBA.Green);
 		g.setMaterial(mat);
 		//rootNode.attachChild(g);
-		listArrow.add(g);
-		return g;
+		//listArrow.add(g);
+		g.setLocalTranslation(point);
+		arrows.attachChild(g);
 	}
 }
