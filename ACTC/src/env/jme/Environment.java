@@ -697,7 +697,7 @@ public class Environment extends CustomSimpleApplication {
 	 * @param enemy the name of the target agent.
 	 * @return true if the enemy is visible, false if not.
 	 */
-	private boolean isVisibleForShoot(String agent, String enemy) {
+	public boolean isVisibleForShoot(String agent, String enemy) {
 		Vector3f origin = getCurrentPosition(agent);
 		Vector3f target = getCurrentPosition(enemy);
 		Vector3f dir = target.subtract(origin).normalize();
@@ -793,26 +793,34 @@ public class Environment extends CustomSimpleApplication {
 		return null;
 	}
 
-	private Vector3f intersects2(String ag, Camera camera, final float xOffset, final float yOffset) {
+	
+	private Vector3f intersects2(String ag, Camera camera, final float angleOffset, final float yOffset, final float rayon) {
+
 		final Vector3f point = players.get(ag).getWorldTranslation().clone();
 		final Vector3f direction = camera.getDirection().clone();
-		float[] coords = new float[3];
-		float angle = players.get(ag).getLocalRotation().toAngles(coords)[1];
+		
+		float angle = -1 * players.get(ag).getLocalRotation().toAngles(new float[3])[1]
+				+ (float)Math.toRadians(angleOffset) - (float)Math.toRadians(90);
 		float cos = (float)Math.cos(angle);
 		float sin = (float)Math.sin(angle);
-		direction.setX(direction.getX() + xOffset * cos);
-		direction.setY(direction.getY() + yOffset * sin);
+		direction.setX(direction.getX() - rayon * cos);
+		direction.setZ(direction.getZ() - rayon * sin);
+		direction.setY(direction.getY() + yOffset);
 
 		CollisionResults res = new CollisionResults();
 		res.clear();
 		final Ray ray = new Ray();
 		ray.setOrigin(point);
 		ray.setDirection(direction);
-		ray.setLimit(VIEW_SHOOTABLE);
+		ray.setLimit(rayon);
 		shootables.collideWith(ray, res);
 
-		addArrow(direction,point);
-
+		if(angleOffset == 0)
+			addArrow(direction,point,ColorRGBA.Red);
+		else
+			addArrow(direction,point,ColorRGBA.Green);
+		
+					
 		if (res.size() > 0) {
 			int size = 0;
 			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
@@ -938,13 +946,11 @@ public class Environment extends CustomSimpleApplication {
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
-		//System.out.println("getWidth() : "+camera.getWidth());
-		//System.out.println("getHeight() : "+camera.getHeight());
-		for (int x = 0; x <= 5; x++) {
-			for (int y = 0; y <=5; y++) {
-
+		// Selon l'angle et non plus la position
+		for (int x = -60; x <= 60; x += 10) {
+			for (int y = 0; y < 10; y += 2) {
 				ArrayList<Vector3f> points = new ArrayList<Vector3f>();
-				Vector3f x1 = intersects2(ag, camera, x, y);
+				Vector3f x1 = intersects2(ag, camera, x, y, rayDistance);
 				if (x1 != null) { 
 					points.add(x1);
 					nb++;
@@ -1034,12 +1040,12 @@ public class Environment extends CustomSimpleApplication {
 			Vector3f dir = enemyPosition.subtract(agentPosition).normalize();
 
 			Ray ray = new Ray(agentPosition, dir);
-			ray.setLimit(VIEW_SHOOTABLE);
+			ray.setLimit(VIEW_DISTANCE);
 			CollisionResults results = new CollisionResults();
 			shootables.collideWith(ray, results);
 			if (results.size()>1) {
 				CollisionResult closest = results.getCollision(1);
-				if (agentPosition.distance(enemyPosition)<=VIEW_SHOOTABLE && closest.getGeometry().equals(players.get(enemy))) {
+				if (agentPosition.distance(enemyPosition)<=VIEW_DISTANCE && closest.getGeometry().equals(players.get(enemy))) {
 					res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
 				}
 			}
@@ -1142,14 +1148,14 @@ public class Environment extends CustomSimpleApplication {
 		debris.emitAllParticles();
 	}
 
-	private void addArrow(Vector3f direction, Vector3f point){
+	private void addArrow(Vector3f direction, Vector3f point,ColorRGBA color){
 		Arrow arrow = new Arrow(direction);
 		arrow.setLineWidth(2); // make arrow thicker
 
 		Geometry g = new Geometry("arrow", arrow);
 		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 		//mat.getAdditionalRenderState().setWireframe(true);
-		mat.setColor("Color", ColorRGBA.Green);
+		mat.setColor("Color", color);
 		g.setMaterial(mat);
 		//rootNode.attachChild(g);
 		//listArrow.add(g);

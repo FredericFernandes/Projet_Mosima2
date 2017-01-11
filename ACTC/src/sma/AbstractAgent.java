@@ -20,7 +20,7 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Environment realEnv;
+	public Environment realEnv;
 	private String enemy;
 
 	public AbstractAgent() {
@@ -117,6 +117,10 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	public boolean seeEnemy(){
 		//System.out.println(" seeMyEnemy name : "+getLocalName()+" enemy "+ enemy);
 		return realEnv.isVisible(getLocalName(), enemy);
+	}
+	public boolean canShootEnemy(){
+		//System.out.println(" seeMyEnemy name : "+getLocalName()+" enemy "+ enemy);
+		return realEnv.isVisibleForShoot(getLocalName(), enemy);
 	}
 	public void moveToEnemy(){
 		Vector3f enemyPos = realEnv.getCurrentPosition(enemy);

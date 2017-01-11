@@ -186,7 +186,7 @@ public class Env extends CustomSimpleApplication /*implements ActionListener*/ {
 	 
 	    /** 4. We give the terrain its material, position & scale it, and attach it. */
 	    terrain.setMaterial(mat_terrain);
-	    terrain.setLocalTranslation(0, -255, 0);
+	    terrain.setLocalTranslation(0, -100, 0);
 	    terrain.setLocalScale(2f, 1f, 2f);
 	    rootNode.attachChild(terrain);
 	 
