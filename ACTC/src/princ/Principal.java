@@ -185,7 +185,7 @@ public class Principal {
 			e.printStackTrace();
 		}
 		
-		c = containerList.get("container0");
+		/*c = containerList.get("container0");
 		
 		agentName="Player2";
 		try {
@@ -197,7 +197,7 @@ public class Principal {
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		System.out.println("Agents launched...");
 		return agentList;

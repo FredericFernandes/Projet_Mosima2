@@ -24,21 +24,17 @@ public class ObserveBehaviour extends TickerBehaviour {
 		
 		Situation situation = agent.observeMap();
 		
-		if(agent.seeEnemy()){
-			String nameEnemy = situation.agents.get(0).getSecond(); 
-			agent.moveToEnemy();
-			if(agent.canShootEnemy()){
-				agent.addBehaviour(new ShootBehaviour(agent));
+		if(situation.agents.size() != 0){
+			if(agent.seeEnemy()){
+				agent.addBehaviour(new HuntBehaviour(agent));
+			}
+			else{
+				agent.addBehaviour(new SpinBehaviour(agent));
 			}
 		}
-		else {
-			agent.randomMove();
+		else{
+			agent.addBehaviour(new SpinBehaviour(agent));
 		}
-		/*
-		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
-			him.randomMoveAction();
-		}
-		*/
 	}
 	
 	private boolean approximativeEqualsCoordinates(Vector3f a, Vector3f b) {

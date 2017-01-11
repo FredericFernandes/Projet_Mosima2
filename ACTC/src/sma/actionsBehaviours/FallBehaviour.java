@@ -21,7 +21,7 @@ public class FallBehaviour extends TickerBehaviour {
 	@Override
 	public void onTick() {
 		SmartAgent ag = ((SmartAgent)this.myAgent);
-		if(ag.lastpos != null && ag.lastpos == ag.getCurrentPosition() && (ag.lastpos.y < -1))
+		if(ag.lastpos != null && ag.lastpos == ag.getCurrentPosition() && (ag.lastpos.y < -250))
 			stop();
 		ag.lastpos = ag.getCurrentPosition();
 	}

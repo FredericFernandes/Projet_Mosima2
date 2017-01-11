@@ -80,8 +80,8 @@ public class Environment extends CustomSimpleApplication {
 
 	private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int VIEW_SHOOTABLE = 45;
-	private final int VIEW_DISTANCE = 145;
+	private final int VIEW_SHOOTABLE = 5;
+	private final int VIEW_DISTANCE = 50;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
 	private float time;
