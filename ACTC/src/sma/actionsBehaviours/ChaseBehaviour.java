@@ -22,12 +22,19 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 		AbstractAgent him = ((AbstractAgent)this.myAgent);
 		Vector3f currentpos  = him.getCurrentPosition();
 		Vector3f dest = him.getDestination();
-		
+		him.observeMap();
 		if(him.seeEnemy()){
-			//System.out.println(" I see my target ");
-			him.moveToEnemy();
+			//System.out.println(" I see my target ");;
 			//him.directionalMoveEnemy();
-			him.observeMap();
+			
+			if(him.canShootEnemy()){
+				him.addBehaviour(new ShootBehaviour(him));
+			}
+			else{
+				him.moveToEnemy();
+			}
+			
+			
 		}
 		
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
