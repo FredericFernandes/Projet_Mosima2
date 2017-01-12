@@ -18,6 +18,7 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 	
 	@Override
 	void Tick() {
+		//System.out.println("Tick ChaseBehaviour");
 		AbstractAgent him = ((AbstractAgent)this.myAgent);
 		Vector3f currentpos  = him.getCurrentPosition();
 		Vector3f dest = him.getDestination();
@@ -39,7 +40,7 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 	}
 	
 	private boolean approximativeEquals(float a, float b) {
-		return b-2.5 <= a && a <= b+2.5;
+		return b-1.5 <= a && a <= b+1.5;
 	}
 
 

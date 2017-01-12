@@ -26,14 +26,14 @@ public class Principal {
 	private static List<AgentController> agentList;// agents's ref
 	private static Environment env;// static ref of the real environment
 
-	public static Lock entrantLock;
+	public static Lock lockUpdate;
 	public static void main(String[] args){
 
-		entrantLock = new ReentrantLock();
+		lockUpdate = new ReentrantLock();
 		//0) Create the environment
 
-		env = Environment.launchRandom(64);
-		//env = Environment.launch("circleMap2");
+		//env = Environment.launchRandom(64);
+		env = Environment.launch("circleMap2");
 		synchronized(env){
 			try {
 				System.out.println("-- Wait JMonkey ending loading !! ");

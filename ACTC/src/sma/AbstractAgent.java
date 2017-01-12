@@ -4,6 +4,8 @@ package sma;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.text.Position;
+
 import com.jme3.math.Vector3f;
 
 import dataStructures.tuple.Tuple2;
@@ -22,7 +24,8 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	private static final long serialVersionUID = 1L;
 	public Environment realEnv;
 	private String enemy;
-
+	private Vector3f startPostion;
+	
 	public AbstractAgent() {
 		registerO2AInterface(EnvironmentManager.class, this);
 	}
@@ -132,4 +135,14 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	public List<Tuple2<Vector3f, String>> observeAgents() {
 		return realEnv.observeAgents(getLocalName());
 	}
+	
+	public void initStartPostion(){
+		System.out.println("initStartPostion");
+		startPostion = realEnv.getPostionsStart().get(getLocalName());
+	}
+
+	public Vector3f getStartPostion() {
+		return startPostion;
+	}
+	
 }

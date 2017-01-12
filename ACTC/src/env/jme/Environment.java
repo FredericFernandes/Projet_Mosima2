@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import com.jme3.animation.AnimChannel;
+import com.jme3.animation.AnimControl;
+import com.jme3.animation.AnimEventListener;
+import com.jme3.animation.LoopMode;
 import com.jme3.bounding.BoundingBox;
 
 import com.jme3.bounding.BoundingVolume;
@@ -20,6 +25,9 @@ import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 
@@ -42,6 +50,7 @@ import com.jme3.terrain.geomipmap.TerrainPatch;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import com.jme3.util.SkyFactory;
 
 import app.CustomSimpleApplication;
 import dataStructures.tuple.Tuple2;
@@ -57,7 +66,7 @@ import sma.actionsBehaviours.LegalActions.LegalAction;
  * @author WonbinLIM
  *
  */
-public class Environment extends CustomSimpleApplication {
+public class Environment extends CustomSimpleApplication /*implements AnimEventListener*/{
 
 	//	private int time = 0;
 	//	private int endtime;
@@ -80,28 +89,18 @@ public class Environment extends CustomSimpleApplication {
 	//	private Node enemyNode;	
 	private Node bulletNode;
 
-	private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
+	//private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int VIEW_SHOOTABLE = 45;
+	private final int VIEW_SHOOTABLE = 40;
 	private final int VIEW_DISTANCE = 145;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
-	private final float yOffsetMAP = -200f;
+	private static float yOffsetMAP = 0;
 	private float time;
-	//	private Spatial player1;
-	//	private PlayerControl physicsPlayer1;
-	//	private Node player1Node;
+	private Map<String,Vector3f> postionsStart;
 
-	//	private Spatial player2;
-	//	private CharacterControl physicsPlayer2;
-	//	private Node player2Node;
-
-	//private ArrayList<Geometry> listArrow; 
-
-	public static void main(String[] args) {
-		Environment.launchRandom(64);
-		//		Environment.launch("flat_terrain_64");
-	}
+	private AnimChannel channel;
+	private AnimControl control;
 
 	/**
 	 * Launches the given file's heightmap.
@@ -121,6 +120,7 @@ public class Environment extends CustomSimpleApplication {
 	 * @return the created environment
 	 */
 	public static Environment launch(String filename){
+		yOffsetMAP = 0.0f;
 		Environment  env = new Environment(filename);
 		//SimpleApplication app = env;
 		env.start();
@@ -135,6 +135,7 @@ public class Environment extends CustomSimpleApplication {
 	 * @return the created environment
 	 */
 	public static Environment launchRandom(int size) {
+		yOffsetMAP = -200f;
 		Environment env = new Environment(size);
 		//SimpleApplication app = env;
 		env.start();
@@ -184,18 +185,20 @@ public class Environment extends CustomSimpleApplication {
 			rootNode.attachChild(arrows);
 
 			cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
-			cam.setLocation(new Vector3f(0.0f, 0.0f, 0.0f));
+			cam.setLocation(new Vector3f(0.0f, 5.0f, 0.0f));
 			cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
 			flyCam.setMoveSpeed(150);
 			//flyCam.setEnabled(false);
 
 			makeTerrain();
-
+			//initKeys();
 			//listArrow = new ArrayList<Geometry>();
 			//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
 			//		arrow.setLineWidth(10); // make arrow thicker
 			//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
+
+			rootNode.attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
 
 			/***
 			 * NOW JMonkey is ready for Jade 
@@ -207,14 +210,12 @@ public class Environment extends CustomSimpleApplication {
 
 	@Override
 	public void simpleUpdate(float tpf) {
-		//Principal.entrantLock.lock();
+		//System.out.println(tpf);
 		time+=tpf;	
 		if(time>=0.25f){ // wait n sec
 			time=0;
 			arrows.detachAllChildren();
 		}
-		//Principal.entrantLock.unlock();
-
 		//		if (cpt==0) {
 		//			deployAgent("a1", "player");
 		//			moveTo("a1", new Vector3f(0, terrain.getHeightmapHeight(new Vector2f(0,-10))-252f, -10));
@@ -250,6 +251,8 @@ public class Environment extends CustomSimpleApplication {
 		//			}
 		//		}
 	}
+
+
 
 
 	/**
@@ -324,17 +327,19 @@ public class Environment extends CustomSimpleApplication {
 	 * @return true if the agent is deployed, false if an agent with this name already exists.
 	 */
 	public synchronized boolean deployAgent(String agentName, String playertype) {
+		System.out.println("start deployAgent" );
 		if (this.players.containsKey(agentName)) {
 			System.out.println("DeployAgent Error : A player with the name '"+agentName+"' already exists.");
 			//			System.exit(0);
 			return false;
 		}
 		else {
-			int val = terrain.getTerrainSize()-15;
+			int val = terrain.getTerrainSize()-5;
 			if(playertype.equals("player"))
-					val=-val;
-			Vector3f startPostion = new Vector3f(val,-10.0f,val);
-			
+				val=-val;
+			Vector3f startPostion = new Vector3f(val,100.0f,val);
+			postionsStart = new HashMap<String, Vector3f>();
+			postionsStart.put(agentName, startPostion);
 			SphereCollisionShape capsuleShape = new SphereCollisionShape(2);
 			PlayerControl physicsPlayer = new PlayerControl(capsuleShape, 0.05f, terrain);
 			physicsPlayer.setJumpSpeed(5);
@@ -346,43 +351,54 @@ public class Environment extends CustomSimpleApplication {
 			physicsPlayer.setPhysicsLocation(startPostion);
 
 			// we make the function wait 1 seconds for letting the objets be created before.
-			try {
-				wait(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			//						try {
+			//							wait(2000);
+			//						} catch (InterruptedException e) {
+			//							// TODO Auto-generated catch block
+			//							e.printStackTrace();
+			//						}
 
 			getPhysicsSpace().add(physicsPlayer);
 
 
-			//			Spatial player = assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-			//			Spatial player = assetManager.loadModel("assets/Models/GR-75MediumTransport.blend");
+
+			//Spatial player = (Spatial) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+			
 			Box b  = new Box(2, 2, 2);
 			Geometry player = new Geometry("Box", b);
 			player.setModelBound(new BoundingBox());
 			player.setLocalTranslation(startPostion);
-			player.updateModelBound();
-			player.updateGeometricState();
+			player.setLocalScale(0.25f);
+			
+			//control = player.getControl(AnimControl.class);
+			//control.addListener(this);
+			//channel = control.createChannel();
+			//channel.setAnim("stand");		
+			//channel.setAnim("Walk", 0.50f);
+	        //channel.setLoopMode(LoopMode.Loop);
+	          
+			//channel.setSpeed(1f);
+			//player.updateModelBound();
+			//player.updateGeometricState();
 			//			Spatial player = assetManager.loadModel("Models/Test/BasicCubeLow.obj");
 			Material mat;
-			if (playertype.equals("player")) {
-				mat = new Material(assetManager, "Common/MatDefs/Misc/ShowNormals.j3md");
+			mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			if (playertype.equals("player")) {	
+				mat.setColor("Color", ColorRGBA.Blue);
 				Camera cam1 = cam.clone();
-				cam1.setViewPort(0f, .5f, 0f, 0.6f);
+				cam1.setViewPort(0f, .5f, 0f, 0.4f);
 				cam1.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam1);
 				physicsPlayer.setCam(cam1);
 				ViewPort view1 = renderManager.createMainView("Bottom Left", cam1);
 				view1.setClearFlags(true, true, true);
 				view1.attachScene(rootNode);
-				
+
 			}
 			else {
-				mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 				mat.setColor("Color", ColorRGBA.Red);
 				Camera cam2 = cam.clone();
-				cam2.setViewPort(.5f, 1f, 0f, 0.6f);
+				cam2.setViewPort(.5f, 1f, 0f, 0.4f);
 				cam2.setLocation(player.getLocalTranslation());
 				player.setUserData("cam", cam2);
 				physicsPlayer.setCam(cam2);
@@ -393,7 +409,7 @@ public class Environment extends CustomSimpleApplication {
 			}
 
 			player.setMaterial(mat);
-			player.scale(0.25f);
+			//player.scale(0.25f);
 			player.addControl(physicsPlayer);
 			//		    physicsPlayer.setAnim(player);
 			player.setUserData("name", agentName);
@@ -406,6 +422,7 @@ public class Environment extends CustomSimpleApplication {
 
 			this.players.put(agentName, player);
 			this.lastActions.put(agentName, null);
+			System.out.println("end deployAgent" );
 		}
 		return true;
 	}
@@ -510,7 +527,7 @@ public class Environment extends CustomSimpleApplication {
 				return false;
 			}
 		}
-		System.out.println("moveTo Error : the agent "+agent+" doesn't exist.");
+		//System.out.println("moveTo Error : the agent "+agent+" doesn't exist.");
 		return false;
 	}
 
@@ -673,8 +690,9 @@ public class Environment extends CustomSimpleApplication {
 						explode(target);
 						//			                	playersNode.detachChildNamed(enemy);
 						shootables.detachChildNamed(enemy);
-						rootNode.detachChild(marks.get(agent));
+						//rootNode.detachChild(marks.get(agent));
 						players.remove(enemy);
+						resetSimulation();
 					}
 					else {
 						players.get(enemy).setUserData("life", enemyLife);
@@ -704,8 +722,6 @@ public class Environment extends CustomSimpleApplication {
 
 		BoundingVolume bv = players.get(enemy).getWorldBound();
 		bv.setCheckPlane(0);
-
-
 		if (((Camera)players.get(agent).getUserData("cam")).contains(bv).equals(FrustumIntersect.Inside)) {
 			Ray ray = new Ray(origin, dir);
 			ray.setLimit(VIEW_SHOOTABLE);
@@ -725,6 +741,9 @@ public class Environment extends CustomSimpleApplication {
 	public boolean isVisible(String agent, String enemy) {
 		Vector3f origin = getCurrentPosition(agent);
 		Vector3f target = getCurrentPosition(enemy);
+		if (target==null || origin==null){
+			return false;
+		}
 		Vector3f dir = target.subtract(origin).normalize();
 
 		BoundingVolume bv = players.get(enemy).getWorldBound();
@@ -793,12 +812,12 @@ public class Environment extends CustomSimpleApplication {
 		return null;
 	}
 
-	
+
 	private Vector3f intersects2(String ag, Camera camera, final float angleOffset, final float yOffset, final float rayon) {
 
 		final Vector3f point = players.get(ag).getWorldTranslation().clone();
 		final Vector3f direction = camera.getDirection().clone();
-		
+
 		float angle = -1 * players.get(ag).getLocalRotation().toAngles(new float[3])[1]
 				+ (float)Math.toRadians(angleOffset) - (float)Math.toRadians(90);
 		float cos = (float)Math.cos(angle);
@@ -819,8 +838,8 @@ public class Environment extends CustomSimpleApplication {
 			addArrow(direction,point,ColorRGBA.Red);
 		else
 			addArrow(direction,point,ColorRGBA.Green);
-		
-					
+
+
 		if (res.size() > 0) {
 			int size = 0;
 			while (res.size() >= size && res.getCollision(size).getClass().equals(Geometry.class) ) {
@@ -830,9 +849,13 @@ public class Environment extends CustomSimpleApplication {
 				size++;
 			}
 			CollisionResult closest = res.getCollision(size);
-			//		    System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
+			//System.out.println(ag+":size="+res.size()+";"+size+":"+closest.getGeometry()+" ++ "+closest.getGeometry().getClass());
 			if (closest.getGeometry().getClass().equals(TerrainPatch.class)) {
-				//		    	System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
+				//System.out.println("my position : "+players.get(ag).getWorldTranslation()+" contact point : "+closest.getContactPoint());
+				if(angleOffset == 0)
+					addPoint(closest.getContactPoint(), ColorRGBA.Red);
+				else
+					addPoint(closest.getContactPoint(), ColorRGBA.Green);
 
 				return closest.getContactPoint();
 			}		    
@@ -947,7 +970,7 @@ public class Environment extends CustomSimpleApplication {
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
 
 		// Selon l'angle et non plus la position
-		for (int x = -60; x <= 60; x += 10) {
+		for (int x = -50; x <= 50; x += 10) {
 			for (int y = 0; y < 10; y += 2) {
 				ArrayList<Vector3f> points = new ArrayList<Vector3f>();
 				Vector3f x1 = intersects2(ag, camera, x, y, rayDistance);
@@ -1062,7 +1085,7 @@ public class Environment extends CustomSimpleApplication {
 		if (players.containsKey(agent)) {
 			return players.get(agent).getWorldTranslation();
 		}
-		System.out.println("getCurrentPosition Error : the agent "+agent+" doesn't exist.");
+		//System.out.println("getCurrentPosition Error : the agent "+agent+" doesn't exist.");
 		return null;
 	}
 
@@ -1072,8 +1095,12 @@ public class Environment extends CustomSimpleApplication {
 	 * @return the destination of the agent.
 	 */
 	public synchronized Vector3f getDestination(String agent) {
+		if(agent==null) return null;
 		Spatial ag = players.get(agent);
-		Vector3f dest = ag.getControl(PlayerControl.class).getDestination();
+		if(ag==null) return null;
+		PlayerControl playC = ag.getControl(PlayerControl.class);
+		if(playC==null) return null;
+		Vector3f dest = playC.getDestination();
 		return dest;
 	}
 
@@ -1106,7 +1133,7 @@ public class Environment extends CustomSimpleApplication {
 	 * Explosion animation.
 	 * @param coord the coordinates of the explosion.
 	 */
-	private void explode(Vector3f coord) {
+	synchronized private void explode(Vector3f coord) {
 		ParticleEmitter fire =
 				new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 30);
 		Material mat_red = new Material(assetManager,
@@ -1146,20 +1173,100 @@ public class Environment extends CustomSimpleApplication {
 		debris.getParticleInfluencer().setVelocityVariation(.60f);
 		rootNode.attachChild(debris);
 		debris.emitAllParticles();
+
+		try {
+			wait(500);
+			rootNode.detachChild(fire);
+			rootNode.detachChild(debris);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+
 	}
 
 	private void addArrow(Vector3f direction, Vector3f point,ColorRGBA color){
-		Arrow arrow = new Arrow(direction);
-		arrow.setLineWidth(2); // make arrow thicker
-
-		Geometry g = new Geometry("arrow", arrow);
-		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-		//mat.getAdditionalRenderState().setWireframe(true);
-		mat.setColor("Color", color);
-		g.setMaterial(mat);
-		//rootNode.attachChild(g);
-		//listArrow.add(g);
-		g.setLocalTranslation(point);
-		arrows.attachChild(g);
+		if(Principal.lockUpdate.tryLock()){
+			try {
+				Arrow arrow = new Arrow(direction);
+				arrow.setLineWidth(1); // make arrow thicker
+				Geometry g = new Geometry("arrow", arrow);	
+				Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+				//mat.getAdditionalRenderState().setWireframe(true);
+				mat.setColor("Color", color);
+				g.setMaterial(mat);
+				//rootNode.attachChild(g);
+				//listArrow.add(g);
+				g.setLocalTranslation(point);
+				arrows.attachChild(g);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}
 	}
+
+	private void addPoint(Vector3f point,ColorRGBA color){
+		if(Principal.lockUpdate.tryLock()){
+			try {
+				Sphere s = new Sphere(10, 10, 0.25f);
+				Geometry g = new Geometry("Box", s);
+				Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+				mat.setColor("Color", color);
+				g.setMaterial(mat);
+				arrows.attachChild(g);
+
+				//Sphere sphere = new Sphere( 10, 10, 1f);
+				//sphere.radius = 5.0f;
+				//Geometry g = new Geometry("sphere", sphere);
+
+				//Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+
+				//mat.setColor("Color", color);
+				//g.setMaterial(mat);
+				g.setLocalTranslation(point);
+				//arrows.attachChild(g);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}
+	}
+	public Map<String, Vector3f> getPostionsStart() {
+		return postionsStart;
+	}
+
+	public HashMap<String, Spatial> getPlayers() {
+		return players;
+	}
+	public boolean isDead(String nameAgent){
+		Spatial player = players.get(nameAgent);
+		if(player==null) return true;
+		int agentLife = ((int)player.getUserData("life"));
+		return (agentLife<=0);
+	}
+
+	private void resetSimulation() {
+		System.out.println("Reset de la simulation");
+
+	}
+
+
+	
+//	/** Custom Keybinding: Map named actions to inputs. */
+//	  private void initKeys() {
+//	    inputManager.addMapping("Walk", new KeyTrigger(KeyInput.KEY_G));
+//	    inputManager.addListener(actionListener, "Walk");
+//	  }
+//	  private ActionListener actionListener = new ActionListener() {
+//	    public void onAction(String name, boolean keyPressed, float tpf) {
+//	      if (name.equals("Walk") && !keyPressed) {
+//	    	  System.out.println("G");
+//	        if (!channel.getAnimationName().equals("Walk")) {
+//	          channel.setAnim("Walk", 0.50f);
+//	          channel.setLoopMode(LoopMode.Loop);
+//	        }
+//	      }
+//	    }
+//	  };
 }

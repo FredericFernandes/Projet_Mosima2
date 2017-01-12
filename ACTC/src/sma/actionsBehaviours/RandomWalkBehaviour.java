@@ -19,6 +19,7 @@ public class RandomWalkBehaviour extends SecureTickerBehaviour {
 
 	@Override
 	protected void Tick() {
+		//System.out.println("Tick RandomWalkBehaviour");
 		Vector3f currentpos  = ((AbstractAgent)this.myAgent).getCurrentPosition();
 		Vector3f dest = ((AbstractAgent)this.myAgent).getDestination();	
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
@@ -32,7 +33,7 @@ public class RandomWalkBehaviour extends SecureTickerBehaviour {
 	}
 	
 	private boolean approximativeEquals(float a, float b) {
-		return b-2.5 <= a && a <= b+2.5;
+		return b-1.5 <= a && a <= b+1.5;
 	}
 
 }

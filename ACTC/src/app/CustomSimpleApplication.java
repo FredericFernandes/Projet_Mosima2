@@ -229,10 +229,19 @@ public abstract class CustomSimpleApplication extends SimpleApplication  {
 	}
 	@Override
 	public void update() {
-		//System.out.println("start update ");
-		Principal.entrantLock.lock();
-		super.update();
-		//System.out.println("end update ");
-		Principal.entrantLock.unlock();
+		//	System.out.println("start update");
+			Principal.lockUpdate.lock();
+			try {
+				super.update();
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+			//System.out.println("end update");	
+	}
+	public float getSpeed(){
+		return this.speed;
+	}
+	public boolean isPaused(){
+		return this.paused;
 	}
 }
