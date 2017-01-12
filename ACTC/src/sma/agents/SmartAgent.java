@@ -15,6 +15,8 @@ public class SmartAgent extends AbstractAgent {
 	public Vector3f lastpos;
 	public Vector3f highestPos;
 	
+	public Vector3f enemyLastPos;
+	
 	private static final long serialVersionUID = -8223709352673984179L;
 
 

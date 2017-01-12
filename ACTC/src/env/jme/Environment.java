@@ -91,8 +91,8 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 	//private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int VIEW_SHOOTABLE = 5;
-	private final int VIEW_DISTANCE = 50;
+	private final int VIEW_SHOOTABLE = 75;
+	private final int VIEW_DISTANCE = 75;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
 	private static float yOffsetMAP = 0;
@@ -185,7 +185,7 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			rootNode.attachChild(arrows);
 
 			cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
-			cam.setLocation(new Vector3f(0.0f, 5.0f, 0.0f));
+			cam.setLocation(new Vector3f(0.0f, 250.0f, 75.0f));
 			cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
 
 			flyCam.setMoveSpeed(150);
@@ -337,7 +337,7 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			int val = terrain.getTerrainSize()-20;
 			if(playertype.equals("player"))
 				val=-val;
-			Vector3f startPostion = new Vector3f(val,100.0f,val);
+			Vector3f startPostion = new Vector3f(val,255.0f,val);
 			postionsStart = new HashMap<String, Vector3f>();
 			postionsStart.put(agentName, startPostion);
 			SphereCollisionShape capsuleShape = new SphereCollisionShape(2);
@@ -999,14 +999,14 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			}
 		}
 
-		//		System.out.println("agent's altitude : "+agentPos.y);
-		//		System.out.println("lowest : "+lowestPosition);
-		//		System.out.println("highest : "+highestPosition);
-		//		System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
-		//		System.out.println("fieldOfView : "+nb);
-		//		System.out.println("maxDepth : "+maxDepth);
-		//		System.out.println("Consistency : "+heights.size()*1./nb);
-		//		System.out.println("\n");
+//				System.out.println("agent's altitude : "+agentPos.y);
+//				System.out.println("lowest : "+lowestPosition);
+//				System.out.println("highest : "+highestPosition);
+//				System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+//				System.out.println("fieldOfView : "+nb);
+//				System.out.println("maxDepth : "+maxDepth);
+//				System.out.println("Consistency : "+heights.size()*1./nb);
+//				System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 

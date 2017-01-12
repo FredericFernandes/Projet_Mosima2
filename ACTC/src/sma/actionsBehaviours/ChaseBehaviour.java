@@ -28,6 +28,8 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 			him.moveToEnemy();
 			//him.directionalMoveEnemy();
 			him.observeMap();
+			if(him.canShootEnemy())
+				him.addBehaviour(new ShootBehaviour(him));
 		}
 		
 		if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {

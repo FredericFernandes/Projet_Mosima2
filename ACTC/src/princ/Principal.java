@@ -33,7 +33,7 @@ public class Principal {
 		//0) Create the environment
 
 		//env = Environment.launchRandom(64);
-		env = Environment.launch("circleMap2");
+		env = Environment.launch("PerlinMap");
 		synchronized(env){
 			try {
 				System.out.println("-- Wait JMonkey ending loading !! ");
@@ -206,7 +206,7 @@ public class Principal {
 
 
 			Object[] objtab=new Object[]{env, false};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,BasicAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,ChaseAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {

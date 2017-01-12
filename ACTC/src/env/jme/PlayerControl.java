@@ -18,7 +18,7 @@ import com.jme3.terrain.geomipmap.TerrainQuad;
 public class PlayerControl extends CharacterControl{
 	
 	public TerrainQuad terrain;
-	private Camera cam;
+	public Camera cam;
 	// boolean for the destination-moving function
 	private boolean ismoving = false;
 	private Vector3f destination;

@@ -12,6 +12,11 @@ public class SpinBehaviour extends SecureOneShotBehaviour {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	/*
+	 * Behaviour de rotation : L'agent tourne sur lui-même
+	 * afin de découvrir ses alentours
+	 */
 	
 	public SpinBehaviour(final AbstractAgent myagent) {
 		super(myagent);
@@ -19,6 +24,7 @@ public class SpinBehaviour extends SecureOneShotBehaviour {
 
 	@Override
 	public void oneAction() {
+		System.out.println("Tick SpinBehaviour");
 		SmartAgent ag = ((SmartAgent)this.myAgent);
 		
 		ag.lookAt(LegalAction.values()[9]);
@@ -43,10 +49,11 @@ public class SpinBehaviour extends SecureOneShotBehaviour {
 			}
 		}
 		
-		// Si i != 17 , on a trouvé l'ennemi en spinnant
+		// Si i != 17 , on a trouv�� l'ennemi en spinnant
 		if(i != 17){
 			ag.addBehaviour(new HuntBehaviour(ag));
 		}else{
+			ag.highestPos = highest.maxAltitude;
 			ag.addBehaviour(new ClimbBehaviour(ag));
 		}
 		

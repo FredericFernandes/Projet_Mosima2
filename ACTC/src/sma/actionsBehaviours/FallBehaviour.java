@@ -13,6 +13,11 @@ public class FallBehaviour extends SecureTickerBehaviour {
 	protected boolean isDone = false;
 	protected Vector3f startPosition;
 	private static final long serialVersionUID = 1L;
+
+	/*
+	 * Behaviour initial : Sert à bloquer les autres tant que
+	 * les agents n'ont pas touché le sol
+	 */
 	
 	public FallBehaviour(final AbstractAgent myagent) {
 		super(myagent,200);
