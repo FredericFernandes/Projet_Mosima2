@@ -60,6 +60,7 @@ public class PlayerControl extends CharacterControl{
 				setWalkDirection(dir);
 				cam.setLocation(this.spatial.getWorldTranslation());
 				cam.lookAtDirection(dir.clone().setY(0.0f), Vector3f.UNIT_Y);
+				//cam.lookAtDirection(dir, Vector3f.UNIT_Y);
 				
 			}
 			else {

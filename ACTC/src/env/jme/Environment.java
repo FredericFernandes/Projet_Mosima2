@@ -211,46 +211,14 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 	@Override
 	public void simpleUpdate(float tpf) {
+		
 		//System.out.println(tpf);
 		time+=tpf;	
-		if(time>=0.25f){ // wait n sec
+		if(time>=0.5f){ // wait n sec
 			time=0;
 			arrows.detachAllChildren();
 		}
-		//		if (cpt==0) {
-		//			deployAgent("a1", "player");
-		//			moveTo("a1", new Vector3f(0, terrain.getHeightmapHeight(new Vector2f(0,-10))-252f, -10));
-		//			deployAgent("e1", "enemy");
-		//			randomMove("e1");
-		//		}
-		//		cpt++;
-		//		if (cpt>2000) {
-		//			if (players.containsKey("a1") && players.containsKey("e1")) {
-		//				if (new Random().nextInt(2)==0) {
-		//					shoot("a1", "e1");
-		//					shoot("e1", "a1");
-		//				} else {
-		//					shoot("e1", "a1");
-		//					shoot("a1", "e1");
-		//				}
-		//			}
-		//			if (players.containsKey("a1") && players.containsKey("e1")) {
-		//				Spatial a1 = players.get("a1");
-		//				Vector3f currentpos  = a1.getWorldTranslation();
-		//				Vector3f dest = a1.getControl(PlayerControl.class).getDestination();
-		//				if (dest==null || approximativeEqualsCoordinates(currentpos, dest)) {
-		//					randomMove("a1");
-		//				}
-		//			}
-		//			if (players.containsKey("e1") && players.containsKey("a1")) {
-		//				Spatial e1 = players.get("e1");
-		//				Vector3f currentpos2  = e1.getWorldTranslation();
-		//				Vector3f dest2 = e1.getControl(PlayerControl.class).getDestination();
-		//				if (dest2==null || approximativeEqualsCoordinates(currentpos2, dest2)) {
-		//					randomMove("e1");
-		//				}
-		//			}
-		//		}
+		
 	}
 
 
@@ -987,7 +955,16 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 		float sum = 0;
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
-
+		
+		synchronized (arrows) {
+			Principal.lockUpdate.lock();
+			try {
+				arrows.detachAllChildren();
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}	
+		
 		// Selon l'angle et non plus la position
 		for (int x = -50; x <= 50; x += 10) {
 			for (int y = 0; y < 10; y += 2) {
