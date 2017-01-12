@@ -32,8 +32,8 @@ public class Principal {
 		lockUpdate = new ReentrantLock();
 		//0) Create the environment
 
-		//env = Environment.launchRandom(64);
-		env = Environment.launch("PerlinMap");
+		env = Environment.launchRandom(64);
+		//env = Environment.launch("circleMap2");
 		synchronized(env){
 			try {
 				System.out.println("-- Wait JMonkey ending loading !! ");

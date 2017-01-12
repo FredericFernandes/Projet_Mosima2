@@ -17,6 +17,12 @@ public class SmartAgent extends AbstractAgent {
 	
 	public Vector3f enemyLastPos;
 	
+	public double patrol = 0;
+	public int patrolDirection = 0;
+
+	public boolean justOnTop = true;
+	public double timeTop = -1;
+	
 	private static final long serialVersionUID = -8223709352673984179L;
 
 
