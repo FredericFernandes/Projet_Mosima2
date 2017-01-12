@@ -30,10 +30,33 @@ public class ClimbBehaviour extends SecureOneShotBehaviour {
 		
 		SmartAgent agent= ((SmartAgent)this.myAgent);
 		Situation s = agent.observeMap();
-		if(agent.highestPos!=null){ // on monte
+		// Si on a atteint le point d'altitude maximum et qu'on est en patrouille, on patrouille
+		if(agent.patrol > 0){
+			agent.justOnTop = true;
+			
+			System.out.println("####\n PATROUILLE \n####");
+			agent.cardinalMove(LegalAction.values()[agent.patrolDirection - 8]);
+			agent.patrol--;
+		}
+		// Si on n'est pas encore au point d'altitude maximum, et qu'on n'est pas en patrouille, on monte
+		else if(agent.highestPos!=null){
 			agent.moveTo(agent.highestPos);
-		}else{
-			agent.lookAt(LegalAction.values()[(new Random()).nextInt(8)+9]);
+		}
+		// Si on est au point d'alt max, on effectue une patrouille après y etre resté pendant 5 secondes
+		else{
+			agent.patrolDirection = (new Random()).nextInt(8)+9;
+			agent.lookAt(LegalAction.values()[agent.patrolDirection]);
+			
+			if( agent.timeTop == -1 || agent.justOnTop){
+				agent.timeTop = System.currentTimeMillis();
+				agent.justOnTop = false;
+			}
+			if(System.currentTimeMillis() - agent.timeTop > 5000){
+				// On effectue une patrouille pendant 20 ticks
+				agent.patrol = 20;
+
+				agent.timeTop = System.currentTimeMillis();
+			}	
 		}
 	
 		

@@ -145,4 +145,12 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 		return startPostion;
 	}
 	
+	public int getHP(){
+		return realEnv.getHP(this.getLocalName());
+	}
+	
+	public int getEnemyHP(){
+		return realEnv.getHP("Player 2");
+	}
+	
 }

@@ -1251,6 +1251,9 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 	}
 
+	public int getHP(String name){
+		return players.get(name).getUserData("life");
+	}
 
 	
 //	/** Custom Keybinding: Map named actions to inputs. */
