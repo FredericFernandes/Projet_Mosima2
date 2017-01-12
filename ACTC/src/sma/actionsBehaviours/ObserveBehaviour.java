@@ -1,16 +1,20 @@
 package sma.actionsBehaviours;
 
+import sma.AbstractAgent;
+import sma.agents.SmartAgent;
+
 import com.jme3.math.Vector3f;
 
-import env.jme.Environment;
 import env.jme.Situation;
-import jade.core.behaviours.TickerBehaviour;
-import sma.AbstractAgent;
 
 public class ObserveBehaviour extends SecureTickerBehaviour {
 
-
 	private static final long serialVersionUID = 1L;
+
+	/*
+	 * Behaviour principal : L'agent observe la carte et agit en conséquence de
+	 * ce qu'il voit.
+	 */
 
 	public ObserveBehaviour(final AbstractAgent myagent) {
 		super(myagent);
@@ -19,24 +23,52 @@ public class ObserveBehaviour extends SecureTickerBehaviour {
 	@Override
 	protected void Tick() {
 
+		System.out.println("--------------------------");
 		System.out.println("Tick ObserveBehaviour");
-		AbstractAgent agent = ((AbstractAgent)this.myAgent);
-		Vector3f currentpos  = agent.getCurrentPosition();
-		Vector3f dest = agent.getDestination();
 
+		SmartAgent agent = ((SmartAgent) this.myAgent);
+		Vector3f currentpos = agent.getCurrentPosition();
+		Vector3f dest = agent.getDestination();
 		Situation situation = agent.observeMap();
-		
-		if(situation.agents.size() != 0){
-			if(agent.seeEnemy()){
+
+		// Si la liste des agents à portée de vue est non nulle
+		if (situation.agents.size() != 0) {
+
+			// Si il est possible d'observer l'agent, on le pourchasse
+			if (agent.seeEnemy()) {
+
 				System.out.println("I see Enemy ");
+
+				String nameEnemy = "";
+				if (situation.agents.size() != 0){
+					nameEnemy = situation.agents.get(0).getSecond();
+				}
+				Vector3f pos = agent.realEnv.getCurrentPosition(nameEnemy);
+				if (pos != null)
+					agent.enemyLastPos = pos;
+
 				agent.addBehaviour(new HuntBehaviour(agent));
+			} 
+			// Sinon, si l'on n'a pas encore visité la derniere position vue de l'agent, on s'y rend
+			else if (dest != null && agent.enemyLastPos != null && !approximativeEqualsCoordinates(currentpos,agent.enemyLastPos)){
+				agent.moveTo(agent.enemyLastPos);
 			}
-			else{
+			// Sinon, on tourne sur soi-même pour observer les alentours
+			else {
+				agent.enemyLastPos = null;
 				agent.addBehaviour(new SpinBehaviour(agent));
 			}
 		}
-		else{
-			agent.addBehaviour(new SpinBehaviour(agent));
+		// Sinon, si aucun agent n'est à portée, on effectue le même comportement que lorsqu'on ne peut pas le voir
+		else {
+			if (dest != null && agent.enemyLastPos != null && !approximativeEqualsCoordinates(currentpos,agent.enemyLastPos)){
+				agent.moveTo(agent.enemyLastPos);
+			}
+			// Sinon, on tourne sur soi-même pour observer les alentours
+			else {
+				agent.enemyLastPos = null;
+				agent.addBehaviour(new SpinBehaviour(agent));
+			}
 		}
 	}
 
@@ -45,6 +77,6 @@ public class ObserveBehaviour extends SecureTickerBehaviour {
 	}
 
 	private boolean approximativeEquals(float a, float b) {
-		return b-1.5 <= a && a <= b+1.5;
+		return b - 1.5 <= a && a <= b + 1.5;
 	}
 }
