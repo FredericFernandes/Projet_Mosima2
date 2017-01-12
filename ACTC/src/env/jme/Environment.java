@@ -211,14 +211,14 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 
 	@Override
 	public void simpleUpdate(float tpf) {
-		
+
 		//System.out.println(tpf);
 		time+=tpf;	
 		if(time>=0.5f){ // wait n sec
 			time=0;
 			arrows.detachAllChildren();
 		}
-		
+
 	}
 
 
@@ -343,7 +343,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			channel.setLoopMode(LoopMode.Loop);
 
 			channel.setSpeed(1f);
-			
+
 			//player.updateModelBound();
 			//player.updateGeometricState();
 			//			Spatial player = assetManager.loadModel("Models/Test/BasicCubeLow.obj");
@@ -710,7 +710,15 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			Ray ray = new Ray(origin, dir);
 			ray.setLimit(VIEW_SHOOTABLE);
 			CollisionResults results = new CollisionResults();
-			shootables.collideWith(ray, results);
+			synchronized (shootables) {
+				Principal.lockUpdate.lock();
+				try {
+					shootables.collideWith(ray, results);
+				} finally {
+					Principal.lockUpdate.unlock();
+				}
+			}	
+
 			if (results.size()>1) {
 				CollisionResult closest = results.getCollision(1);
 				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
@@ -738,7 +746,15 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			Ray ray = new Ray(origin, dir);
 			ray.setLimit(VIEW_DISTANCE);
 			CollisionResults results = new CollisionResults();
-			shootables.collideWith(ray, results);
+			synchronized (shootables) {
+				Principal.lockUpdate.lock();
+				try {
+					shootables.collideWith(ray, results);
+				} finally {
+					Principal.lockUpdate.unlock();
+				}
+			}	
+
 			if (results.size()>1) {
 				CollisionResult closest = results.getCollision(1);
 				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
@@ -772,7 +788,14 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		ray.setOrigin(point);
 		ray.setDirection(direction);
 		ray.setLimit(VIEW_SHOOTABLE);
-		shootables.collideWith(ray, res);
+		synchronized (shootables) {
+			Principal.lockUpdate.lock();
+			try {
+				shootables.collideWith(ray, res);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}	
 
 
 		if (res.size() > 0) {
@@ -816,7 +839,14 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		ray.setOrigin(point);
 		ray.setDirection(direction);
 		ray.setLimit(rayon);
-		shootables.collideWith(ray, res);
+		synchronized (shootables) {
+			Principal.lockUpdate.lock();
+			try {
+				shootables.collideWith(ray, res);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}	
 
 		if(angleOffset == 0)
 			addArrow(direction,point,ColorRGBA.Red);
@@ -952,7 +982,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		float sum = 0;
 		float maxDepth = 0;
 		HashMap<Float, Integer> heights = new HashMap<Float, Integer>();
-		
+
 		synchronized (arrows) {
 			Principal.lockUpdate.lock();
 			try {
@@ -961,7 +991,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 				Principal.lockUpdate.unlock();
 			}
 		}	
-		
+
 		// Selon l'angle et non plus la position
 		for (int x = -50; x <= 50; x += 10) {
 			for (int y = 0; y < 10; y += 2) {
@@ -992,14 +1022,14 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			}
 		}
 
-//				System.out.println("agent's altitude : "+agentPos.y);
-//				System.out.println("lowest : "+lowestPosition);
-//				System.out.println("highest : "+highestPosition);
-//				System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
-//				System.out.println("fieldOfView : "+nb);
-//				System.out.println("maxDepth : "+maxDepth);
-//				System.out.println("Consistency : "+heights.size()*1./nb);
-//				System.out.println("\n");
+		//				System.out.println("agent's altitude : "+agentPos.y);
+		//				System.out.println("lowest : "+lowestPosition);
+		//				System.out.println("highest : "+highestPosition);
+		//				System.out.println("average :"+sum+"/"+nb+" = "+sum/nb);
+		//				System.out.println("fieldOfView : "+nb);
+		//				System.out.println("maxDepth : "+maxDepth);
+		//				System.out.println("Consistency : "+heights.size()*1./nb);
+		//				System.out.println("\n");
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 
@@ -1058,7 +1088,15 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			Ray ray = new Ray(agentPosition, dir);
 			ray.setLimit(VIEW_DISTANCE);
 			CollisionResults results = new CollisionResults();
-			shootables.collideWith(ray, results);
+			synchronized (shootables) {
+				Principal.lockUpdate.lock();
+				try {
+					shootables.collideWith(ray, results);
+				} finally {
+					Principal.lockUpdate.unlock();
+				}
+			}	
+			
 			if (results.size()>1) {
 				CollisionResult closest = results.getCollision(1);
 				if (agentPosition.distance(enemyPosition)<=VIEW_DISTANCE && closest.getGeometry().equals(players.get(enemy))) {
@@ -1106,7 +1144,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @return true if equals, false if not.
 	 */
 	private boolean approximativeEquals(float a, float b) {
-		return b-2.5 <= a && a <= b+2.5;
+		return b-1.5 <= a && a <= b+1.5;
 	}
 
 	/**
@@ -1269,13 +1307,13 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	@Override
 	public void onAnimChange(AnimControl arg0, AnimChannel arg1, String arg2) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onAnimCycleDone(AnimControl arg0, AnimChannel arg1, String arg2) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
