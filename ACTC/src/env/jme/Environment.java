@@ -56,6 +56,7 @@ import app.CustomSimpleApplication;
 import dataStructures.tuple.Tuple2;
 import env.terrain.TerrainTools;
 import princ.Principal;
+import sma.AbstractAgent;
 import sma.actionsBehaviours.LegalActions;
 import sma.actionsBehaviours.LegalActions.LegalAction;
 
@@ -327,7 +328,7 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 	 * @return true if the agent is deployed, false if an agent with this name already exists.
 	 */
 	public synchronized boolean deployAgent(String agentName, String playertype) {
-		System.out.println("start deployAgent" );
+		//System.out.println("start deployAgent" );
 		if (this.players.containsKey(agentName)) {
 			System.out.println("DeployAgent Error : A player with the name '"+agentName+"' already exists.");
 			//			System.exit(0);
@@ -363,20 +364,20 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 
 			//Spatial player = (Spatial) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-			
+
 			Box b  = new Box(2, 2, 2);
 			Geometry player = new Geometry("Box", b);
 			player.setModelBound(new BoundingBox());
 			player.setLocalTranslation(startPostion);
 			player.setLocalScale(0.25f);
-			
+
 			//control = player.getControl(AnimControl.class);
 			//control.addListener(this);
 			//channel = control.createChannel();
 			//channel.setAnim("stand");		
 			//channel.setAnim("Walk", 0.50f);
-	        //channel.setLoopMode(LoopMode.Loop);
-	          
+			//channel.setLoopMode(LoopMode.Loop);
+
 			//channel.setSpeed(1f);
 			//player.updateModelBound();
 			//player.updateGeometricState();
@@ -416,13 +417,17 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			player.setUserData("playertype", playertype);
 			player.setUserData("life", LIFE);
 			player.setName(agentName);		      
-
-			shootables.attachChild(player);
-
-
+			synchronized (shootables) {
+				Principal.lockUpdate.lock();
+				try {
+					shootables.attachChild(player);
+				} finally {
+					Principal.lockUpdate.unlock();
+				}
+			}
 			this.players.put(agentName, player);
 			this.lastActions.put(agentName, null);
-			System.out.println("end deployAgent" );
+			//System.out.println("end deployAgent" );
 		}
 		return true;
 	}
@@ -681,15 +686,29 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 					Spatial bullet = getBullet();
 					bullet.setLocalTranslation(origin);
 					bullet.addControl(new BulletControl(dir));
-					bulletNode.attachChild(bullet);
+					synchronized (bulletNode) {
+						Principal.lockUpdate.lock();
+						try {
+							bulletNode.attachChild(bullet);
+						} finally {
+							Principal.lockUpdate.unlock();
+						}
+					}
+
 					System.out.println("bang");
 
 					int enemyLife = ((int)players.get(enemy).getUserData("life"))-DAMAGE;
 					if (enemyLife<=0) {
 						System.out.println(enemy+" killed.");
 						explode(target);
-						//			                	playersNode.detachChildNamed(enemy);
-						shootables.detachChildNamed(enemy);
+						synchronized (shootables) {
+							Principal.lockUpdate.lock();
+							try {
+								shootables.detachChildNamed(enemy);
+							} finally {
+								Principal.lockUpdate.unlock();
+							}
+						}
 						//rootNode.detachChild(marks.get(agent));
 						players.remove(enemy);
 						resetSimulation();
@@ -1153,7 +1172,14 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 		fire.setLowLife(1f);
 		fire.setHighLife(3f);
 		fire.getParticleInfluencer().setVelocityVariation(0.3f);
-		rootNode.attachChild(fire);
+		synchronized (rootNode) {
+			Principal.lockUpdate.lock();
+			try {
+				rootNode.attachChild(fire);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}
 
 		ParticleEmitter debris =
 				new ParticleEmitter("Debris", ParticleMesh.Type.Triangle, 10);
@@ -1171,13 +1197,27 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 		debris.setStartColor(ColorRGBA.White);
 		debris.setGravity(0, 6, 0);
 		debris.getParticleInfluencer().setVelocityVariation(.60f);
-		rootNode.attachChild(debris);
+		synchronized (rootNode) {
+			Principal.lockUpdate.lock();
+			try {
+				rootNode.attachChild(debris);
+			} finally {
+				Principal.lockUpdate.unlock();
+			}
+		}		
 		debris.emitAllParticles();
 
 		try {
 			wait(500);
-			rootNode.detachChild(fire);
-			rootNode.detachChild(debris);
+			synchronized (rootNode) {
+				Principal.lockUpdate.lock();
+				try {
+					rootNode.detachChild(fire);
+					rootNode.detachChild(debris);
+				} finally {
+					Principal.lockUpdate.unlock();
+				}
+			}			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1188,49 +1228,46 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 	}
 
 	private void addArrow(Vector3f direction, Vector3f point,ColorRGBA color){
-		if(Principal.lockUpdate.tryLock()){
+
+		Arrow arrow = new Arrow(direction);
+		arrow.setLineWidth(1); // make arrow thicker
+		Geometry g = new Geometry("arrow", arrow);	
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		//mat.getAdditionalRenderState().setWireframe(true);
+		mat.setColor("Color", color);
+		g.setMaterial(mat);
+		//rootNode.attachChild(g);
+		//listArrow.add(g);
+		g.setLocalTranslation(point);
+		synchronized (arrows) {
+			Principal.lockUpdate.lock();
 			try {
-				Arrow arrow = new Arrow(direction);
-				arrow.setLineWidth(1); // make arrow thicker
-				Geometry g = new Geometry("arrow", arrow);	
-				Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-				//mat.getAdditionalRenderState().setWireframe(true);
-				mat.setColor("Color", color);
-				g.setMaterial(mat);
-				//rootNode.attachChild(g);
-				//listArrow.add(g);
-				g.setLocalTranslation(point);
 				arrows.attachChild(g);
 			} finally {
 				Principal.lockUpdate.unlock();
 			}
-		}
+		}			
+
 	}
 
 	private void addPoint(Vector3f point,ColorRGBA color){
-		if(Principal.lockUpdate.tryLock()){
+
+		Sphere s = new Sphere(10, 10, 0.25f);
+		Geometry g = new Geometry("Box", s);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", color);
+		g.setMaterial(mat);
+		g.setLocalTranslation(point);
+		synchronized (arrows) {
+			Principal.lockUpdate.lock();
 			try {
-				Sphere s = new Sphere(10, 10, 0.25f);
-				Geometry g = new Geometry("Box", s);
-				Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-				mat.setColor("Color", color);
-				g.setMaterial(mat);
-				arrows.attachChild(g);
-
-				//Sphere sphere = new Sphere( 10, 10, 1f);
-				//sphere.radius = 5.0f;
-				//Geometry g = new Geometry("sphere", sphere);
-
-				//Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-
-				//mat.setColor("Color", color);
-				//g.setMaterial(mat);
-				g.setLocalTranslation(point);
-				//arrows.attachChild(g);
+				arrows.attachChild(g);	
 			} finally {
 				Principal.lockUpdate.unlock();
 			}
-		}
+		}	
+
+
 	}
 	public Map<String, Vector3f> getPostionsStart() {
 		return postionsStart;
@@ -1255,21 +1292,21 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 		return players.get(name).getUserData("life");
 	}
 
-	
-//	/** Custom Keybinding: Map named actions to inputs. */
-//	  private void initKeys() {
-//	    inputManager.addMapping("Walk", new KeyTrigger(KeyInput.KEY_G));
-//	    inputManager.addListener(actionListener, "Walk");
-//	  }
-//	  private ActionListener actionListener = new ActionListener() {
-//	    public void onAction(String name, boolean keyPressed, float tpf) {
-//	      if (name.equals("Walk") && !keyPressed) {
-//	    	  System.out.println("G");
-//	        if (!channel.getAnimationName().equals("Walk")) {
-//	          channel.setAnim("Walk", 0.50f);
-//	          channel.setLoopMode(LoopMode.Loop);
-//	        }
-//	      }
-//	    }
-//	  };
+
+	//	/** Custom Keybinding: Map named actions to inputs. */
+	//	  private void initKeys() {
+	//	    inputManager.addMapping("Walk", new KeyTrigger(KeyInput.KEY_G));
+	//	    inputManager.addListener(actionListener, "Walk");
+	//	  }
+	//	  private ActionListener actionListener = new ActionListener() {
+	//	    public void onAction(String name, boolean keyPressed, float tpf) {
+	//	      if (name.equals("Walk") && !keyPressed) {
+	//	    	  System.out.println("G");
+	//	        if (!channel.getAnimationName().equals("Walk")) {
+	//	          channel.setAnim("Walk", 0.50f);
+	//	          channel.setLoopMode(LoopMode.Loop);
+	//	        }
+	//	      }
+	//	    }
+	//	  };
 }

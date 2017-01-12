@@ -36,8 +36,6 @@ public class SmartAgent extends AbstractAgent {
 	public SequentialBehaviour seq;
 
 	protected void setup(){
-			Principal.lockUpdate.lock();
-			try {
 				super.setup();	
 				// SETUP
 				final Object[] args = getArguments();
@@ -64,10 +62,6 @@ public class SmartAgent extends AbstractAgent {
 				addBehaviour(seq);
 				String type = friendorFoe? "Agent":"Enemy";
 				System.out.println("the "+this.getLocalName()+ " is started. SmartAgent ,  Type: " +type);
-			} finally {
-				Principal.lockUpdate.unlock();
-
-		}
 		
 
 

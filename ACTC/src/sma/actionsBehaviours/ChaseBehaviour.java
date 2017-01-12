@@ -24,9 +24,8 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 		Vector3f dest = him.getDestination();
 		
 		if(him.seeEnemy()){
-			//System.out.println(" I see my target ");
+			//System.out.println(" I see my target ");;
 			him.moveToEnemy();
-			//him.directionalMoveEnemy();
 			him.observeMap();
 			if(him.canShootEnemy())
 				him.addBehaviour(new ShootBehaviour(him));

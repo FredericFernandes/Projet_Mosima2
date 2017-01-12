@@ -228,16 +228,52 @@ public abstract class CustomSimpleApplication extends SimpleApplication  {
 		}
 	}
 	@Override
-	public void update() {
-		//	System.out.println("start update");
+	synchronized public void update() {
+		synchronized (this) {
 			Principal.lockUpdate.lock();
 			try {
-				super.update();
+				AudioContext.setAudioRenderer(this.audioRenderer);		
+				runQueuedTasks();		
+				if ((this.speed == 0.0F) || (this.paused)) {
+					return;
+				}
+				this.timer.update();
+
+				if (this.inputEnabled) {
+					this.inputManager.update(this.timer.getTimePerFrame());
+				}
+
+				if (this.audioRenderer != null)
+					this.audioRenderer.update(this.timer.getTimePerFrame());
+				if ((this.speed == 0.0F) || (this.paused)) {
+					return;
+				}
+
+				float tpf = this.timer.getTimePerFrame() * this.speed;
+
+				this.stateManager.update(tpf);
+
+				simpleUpdate(tpf);
+
+
+				this.rootNode.updateLogicalState(tpf);
+				this.guiNode.updateLogicalState(tpf);
+
+				this.rootNode.updateGeometricState();
+				this.guiNode.updateGeometricState();
+
+				this.stateManager.render(this.renderManager);
+				this.renderManager.render(tpf, this.context.isRenderable());
+				simpleRender(this.renderManager);
+				this.stateManager.postRender();	
 			} finally {
 				Principal.lockUpdate.unlock();
 			}
-			//System.out.println("end update");	
+		}	
+
+
 	}
+
 	public float getSpeed(){
 		return this.speed;
 	}

@@ -20,8 +20,6 @@ public class BasicAgent extends AbstractAgent {
 	public RandomWalkBehaviour randomWalk;
 
 	protected void setup(){
-		Principal.lockUpdate.lock();
-		try {
 			super.setup();
 			//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
 			final Object[] args = getArguments();
@@ -44,9 +42,6 @@ public class BasicAgent extends AbstractAgent {
 			addBehaviour(randomWalk);
 			String type = friendorFoe? "Agent":"Enemy";
 			System.out.println("the "+this.getLocalName()+ " is started. Type: " +type);
-		} finally {
-			Principal.lockUpdate.unlock();
-		}
 
 
 

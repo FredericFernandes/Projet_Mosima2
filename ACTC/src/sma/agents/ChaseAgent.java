@@ -20,8 +20,6 @@ public class ChaseAgent extends AbstractAgent {
 
 	protected void setup(){
 
-		Principal.lockUpdate.lock();
-		try {
 			super.setup();			
 			//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
 			final Object[] args = getArguments();
@@ -43,9 +41,6 @@ public class ChaseAgent extends AbstractAgent {
 			addBehaviour(chaseBehav);
 			String type = friendorFoe? "Agent":"Enemy";
 			System.out.println("the "+this.getLocalName()+ " is started. Type: " +type);
-		} finally {
-			Principal.lockUpdate.unlock();
-		}
 
 
 
