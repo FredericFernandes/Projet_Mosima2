@@ -12,6 +12,9 @@ import env.jme.Environment;
 
 public class SmartAgent extends AbstractAgent {
 
+	public Vector3f lastpos;
+	public Vector3f highestPos;
+	
 	private static final long serialVersionUID = -8223709352673984179L;
 
 

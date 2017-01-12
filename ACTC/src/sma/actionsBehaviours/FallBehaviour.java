@@ -12,17 +12,14 @@ public class FallBehaviour extends SecureTickerBehaviour {
 
 	protected boolean isDone = false;
 	protected Vector3f startPosition;
-	public Vector3f lastpos;
 	private static final long serialVersionUID = 1L;
 	
 	public FallBehaviour(final AbstractAgent myagent) {
-		super(myagent,100);
-		lastpos= null;
+		super(myagent,200);
 		startPosition = myagent.realEnv.getPostionsStart().get(myagent.getLocalName());
 	}
 
 	public void Tick() {
-		//System.out.println("Tick FallBehaviour");
 		
 		Vector3f currentPosition = ((AbstractAgent)myAgent).getCurrentPosition().clone();
 		currentPosition.setY(Math.round(currentPosition.getY()));
@@ -30,11 +27,11 @@ public class FallBehaviour extends SecureTickerBehaviour {
 //		System.out.println(startPosition);
 //		System.out.println("lastpos "+lastpos);	
 //		System.out.println("getCurrentPosition "+ currentPosition);
-		
-		if(lastpos != null && lastpos.equals(currentPosition)){
+		SmartAgent ag = ((SmartAgent)this.myAgent);
+		if(ag.lastpos != null && ag.lastpos.equals(currentPosition)){
 			stop();
-			//System.out.println("Stop FallBehaviour");
+			System.out.println("Stop FallBehaviour");
 		}	
-		lastpos = currentPosition;
+		ag.lastpos = currentPosition;
 	}
 }

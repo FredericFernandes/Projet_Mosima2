@@ -19,21 +19,24 @@ public class ObserveBehaviour extends SecureTickerBehaviour {
 	@Override
 	protected void Tick() {
 
-		//System.out.println("Tick ObserveBehaviour");
+		System.out.println("Tick ObserveBehaviour");
 		AbstractAgent agent = ((AbstractAgent)this.myAgent);
 		Vector3f currentpos  = agent.getCurrentPosition();
 		Vector3f dest = agent.getDestination();
 
 		Situation situation = agent.observeMap();
-		if(agent.seeEnemy()){
-			//String nameEnemy = situation.agents.get(0).getSecond(); 
-			agent.moveToEnemy();
-			if(agent.canShootEnemy()){
-				agent.addBehaviour(new ShootBehaviour(agent));
+		
+		if(situation.agents.size() != 0){
+			if(agent.seeEnemy()){
+				System.out.println("I see Enemy ");
+				agent.addBehaviour(new HuntBehaviour(agent));
+			}
+			else{
+				agent.addBehaviour(new SpinBehaviour(agent));
 			}
 		}
-		else {
-				agent.randomMove();
+		else{
+			agent.addBehaviour(new SpinBehaviour(agent));
 		}
 	}
 

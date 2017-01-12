@@ -91,8 +91,8 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 	//private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int VIEW_SHOOTABLE = 40;
-	private final int VIEW_DISTANCE = 145;
+	private final int VIEW_SHOOTABLE = 5;
+	private final int VIEW_DISTANCE = 50;
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
 	private static float yOffsetMAP = 0;
@@ -334,7 +334,7 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			return false;
 		}
 		else {
-			int val = terrain.getTerrainSize()-5;
+			int val = terrain.getTerrainSize()-20;
 			if(playertype.equals("player"))
 				val=-val;
 			Vector3f startPostion = new Vector3f(val,100.0f,val);
