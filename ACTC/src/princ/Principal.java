@@ -192,7 +192,7 @@ public class Principal {
 
 
 			Object[] objtab=new Object[]{env, true};//used to give informations to the agent
-			AgentController	ag=c.createNewAgent(agentName,ChaseAgent.class.getName(),objtab);
+			AgentController	ag=c.createNewAgent(agentName,SmartAgent.class.getName(),objtab);
 			agentList.add(ag);
 			System.out.println(agentName+" launched");
 		} catch (StaleProxyException e) {
