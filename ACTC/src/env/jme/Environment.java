@@ -67,7 +67,7 @@ import sma.actionsBehaviours.LegalActions.LegalAction;
  * @author WonbinLIM
  *
  */
-public class Environment extends CustomSimpleApplication /*implements AnimEventListener*/{
+public class Environment extends CustomSimpleApplication  implements AnimEventListener{
 
 	//	private int time = 0;
 	//	private int endtime;
@@ -328,25 +328,22 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 			//						}
 
 			getPhysicsSpace().add(physicsPlayer);
+			Spatial player = (Spatial) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
 
-
-
-			//Spatial player = (Spatial) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-
-			Box b  = new Box(2, 2, 2);
-			Geometry player = new Geometry("Box", b);
-			player.setModelBound(new BoundingBox());
+			//Box b  = new Box(2, 2, 2);
+			//Geometry player = new Geometry("Box", b);
+			//player.setModelBound(new BoundingBox());
 			player.setLocalTranslation(startPostion);
-			player.setLocalScale(0.25f);
+			player.setLocalScale(0.20f);
 
-			//control = player.getControl(AnimControl.class);
-			//control.addListener(this);
-			//channel = control.createChannel();
-			//channel.setAnim("stand");		
-			//channel.setAnim("Walk", 0.50f);
-			//channel.setLoopMode(LoopMode.Loop);
+			control = player.getControl(AnimControl.class);
+			control.addListener(this);
+			channel = control.createChannel();		
+			channel.setAnim("Walk", 0.50f);
+			channel.setLoopMode(LoopMode.Loop);
 
-			//channel.setSpeed(1f);
+			channel.setSpeed(1f);
+			
 			//player.updateModelBound();
 			//player.updateGeometricState();
 			//			Spatial player = assetManager.loadModel("Models/Test/BasicCubeLow.obj");
@@ -1267,6 +1264,18 @@ public class Environment extends CustomSimpleApplication /*implements AnimEventL
 
 	public int getHP(String name){
 		return players.get(name).getUserData("life");
+	}
+
+	@Override
+	public void onAnimChange(AnimControl arg0, AnimChannel arg1, String arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAnimCycleDone(AnimControl arg0, AnimChannel arg1, String arg2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

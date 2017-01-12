@@ -14,6 +14,8 @@ import env.jme.Environment;
 import env.jme.Situation;
 
 import jade.core.Agent;
+import jade.core.behaviours.SequentialBehaviour;
+import sma.actionsBehaviours.FallBehaviour;
 import sma.actionsBehaviours.LegalActions.LegalAction;
 
 public class AbstractAgent extends Agent implements EnvironmentManager {
@@ -25,6 +27,9 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	public Environment realEnv;
 	private String enemy;
 	private Vector3f startPostion;
+	protected SequentialBehaviour seq;
+	protected FallBehaviour fallBehaviour;
+	public Vector3f lastpos;
 	
 	public AbstractAgent() {
 		registerO2AInterface(EnvironmentManager.class, this);
@@ -100,6 +105,9 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 
 	protected void setup() {
 		super.setup();
+		seq = new SequentialBehaviour(this);
+		fallBehaviour = new FallBehaviour(this);
+		seq.addSubBehaviour(fallBehaviour);
 	}
 	private void setupEnemy(){
 		enemy = (getLocalName().equals("Player1"))? "Player2" : "Player1";

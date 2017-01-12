@@ -1,10 +1,10 @@
 package sma.agents;
 
 import env.jme.Environment;
-import princ.Principal;
+import jade.core.behaviours.SequentialBehaviour;
 import sma.AbstractAgent;
 import sma.actionsBehaviours.ChaseBehaviour;
-import sma.actionsBehaviours.RandomWalkBehaviour;
+import sma.actionsBehaviours.FallBehaviour;
 
 public class ChaseAgent extends AbstractAgent {
 
@@ -15,9 +15,8 @@ public class ChaseAgent extends AbstractAgent {
 	 * True to create a friend, false otherwise 
 	 */
 	public boolean friendorFoe;
-
 	public ChaseBehaviour chaseBehav;
-
+	
 	protected void setup(){
 
 			super.setup();			
@@ -37,8 +36,11 @@ public class ChaseAgent extends AbstractAgent {
 				System.err.println("Malfunction during parameter's loading of agent"+ this.getClass().getName());
 				System.exit(-1);
 			}
+			
 			chaseBehav = new ChaseBehaviour(this);
-			addBehaviour(chaseBehav);
+			seq.addSubBehaviour(chaseBehav);
+			
+			addBehaviour(seq);
 			String type = friendorFoe? "Agent":"Enemy";
 			System.out.println("the "+this.getLocalName()+ " is started. Type: " +type);
 

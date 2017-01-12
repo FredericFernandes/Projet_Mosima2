@@ -1,9 +1,7 @@
 package sma.agents;
 
 import env.jme.Environment;
-import princ.Principal;
 import sma.AbstractAgent;
-import sma.actionsBehaviours.ChaseBehaviour;
 import sma.actionsBehaviours.RandomWalkBehaviour;
 
 public class BasicAgent extends AbstractAgent {
@@ -19,6 +17,7 @@ public class BasicAgent extends AbstractAgent {
 
 	public RandomWalkBehaviour randomWalk;
 
+	
 	protected void setup(){
 			super.setup();
 			//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
@@ -38,8 +37,11 @@ public class BasicAgent extends AbstractAgent {
 				System.exit(-1);
 			}
 
+			
 			randomWalk = new RandomWalkBehaviour(this);
-			addBehaviour(randomWalk);
+			seq.addSubBehaviour(randomWalk);
+			
+			addBehaviour(seq);
 			String type = friendorFoe? "Agent":"Enemy";
 			System.out.println("the "+this.getLocalName()+ " is started. Type: " +type);
 
