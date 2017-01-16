@@ -1,0 +1,28 @@
+@relation Situation
+
+@attribute fieldOfViewLimit numeric
+@attribute lastAction numeric
+@attribute agentAltitudeX numeric
+@attribute agentAltitudeY numeric
+@attribute agentAltitudeZ numeric
+@attribute minAltitudeX numeric
+@attribute minAltitudeY numeric
+@attribute minAltitudeZ numeric
+@attribute maxAltitudeX numeric
+@attribute maxAltitudeY numeric
+@attribute maxAltitudeZ numeric
+@attribute avgAltitude numeric
+@attribute fieldOfView numeric
+@attribute maxDepth numeric
+@attribute consistency numeric
+@attribute ennemy0X numeric
+@attribute ennemy0Y numeric
+@attribute ennemy0Z numeric
+@attribute ennemy0Name string
+
+@data
+3,0,-6.473349,2.004382,-5.655525,33.866295,2.029194,46.405838,33.866295,2.029194,46.405838,2.029194,3,71.213402,0.333333,8.80415,2.006104,25.663307,Player2
+3,0,-6.32364,2.00457,-0.201192,21.27051,2.064225,46.412849,21.27051,2.064225,46.412849,2.064225,3,58.354965,0.333333,-3.143618,2.420155,17.934464,Player2
+4,0,-4.598605,2.062409,-11.043165,40.679451,2.038348,22.810665,40.679451,2.038348,22.810665,2.038348,4,73.62365,0.25,25.283745,2.642715,18.842152,Player2
+3,0,-3.816638,2.002463,-5.834022,39.615814,2.006803,46.401363,39.615814,2.006803,46.401363,2.006803,3,71.810951,0.333333,-0.257577,2.001868,3.696687,Player2
+3,0,-8.213486,2.000215,1.263408,17.514156,2.145927,46.42918,17.514156,2.145927,46.42918,2.145927,3,56.264362,0.333333,-5.129719,2.128785,22.659931,Player2
