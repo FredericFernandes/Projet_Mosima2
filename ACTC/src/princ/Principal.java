@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.jme3.system.AppSettings;
 
+import dataStructures.tuple.Tuple2;
 import env.jme.Environment;
+import env.terrain.TerrainTools;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -20,44 +23,88 @@ import sma.agents.ChaseAgent;
 import sma.agents.SmartAgent;
 
 public class Principal {
-	
+
 	private static String hostname = "127.0.0.1"; 
 	private static HashMap<String, ContainerController> containerList=new HashMap<String, ContainerController>();// container's name - container's ref
-	private static List<AgentController> agentList;// agents's ref
+	public static List<AgentController> agentList;// agents's ref
 	private static Environment env;// static ref of the real environment
 
 	public static Lock lockUpdate;
+	public static final int nbSimulationMax = 5;
+	public static final int nbSimulationByMap = 5;
+	public static int nbWin =0;
+	public static Tuple2<Integer, float[]> map;
+	public static int nbMatchNull =0;
+	public static boolean printDebug = true;
+
 	public static void main(String[] args){
 
-		lockUpdate = new ReentrantLock();
-		//0) Create the environment
+		lockUpdate = new ReentrantLock();	
+		env = new Environment();
 
-		//env = Environment.launchRandom(64);
-		env = Environment.launch("circleMap2");
-		synchronized(env){
+		emptyPlatform(containerList);
+
+		for(int nbSim =0 ; nbSim<Principal.nbSimulationMax;nbSim++){
+			synchronized(env){
+				try {				
+					
+					agentList=createAgents(containerList);
+					//env.launchNormalMap(createMap("circleMap2"));
+					env.launchPerlinMap(createMap(64));
+
+					System.out.println("-- Wait JMonkey ending loading !! ");
+					env.wait();
+					System.out.println("-- startAgents --");
+					startAgents(agentList);
+
+					System.out.println("---->nb Simulation "+ (nbSim+1));
+					System.out.println("---->nb Win  "+ Principal.nbWin);
+					System.out.println("---Wait for finish--");
+					env.wait(); // wait for finish
+
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+
 			try {
-				System.out.println("-- Wait JMonkey ending loading !! ");
-				env.wait();
-				//env.setPauseOnLostFocus(true);
-				System.out.println("Start Jade ");
-				emptyPlatform(containerList);
-				
-				//2) create agents and add them to the platform.
-				agentList=createAgents(containerList);
-
-				//3) launch agents
-				startAgents(agentList);
-				//env.setPauseOnLostFocus(false);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			env.stop(true);
+			env = new Environment();
+			System.gc();
+		}
+
+	}
+
+	public static Tuple2<Integer, float[]> createMap(String fileName){
+		if(Principal.map==null){
+			System.out.println("###Create initial Map");
+			System.out.println("###Create initial Map");
+			Principal.map =  TerrainTools.getHeightMapFromTxt(fileName);
+			}
+		return Principal.map;
+	}
+	public static Tuple2<Integer, float[]> createMap(int size){
+		if(Principal.map==null){
+			System.out.println("###Create initial Map");
+			Principal.map =  TerrainTools.getPerlinAlgoMap(size);
+		}else{
+			if(nbWin%nbSimulationByMap==0){
+				System.out.println("###Create new map");
+				nbWin=0;
+				Principal.map =  TerrainTools.getPerlinAlgoMap(size);
+			}
 		}
 		
-		
-		
+		return Principal.map;
+
 	}
-	
 	
 	/**********************************************
 	 * 
@@ -113,19 +160,19 @@ public class Principal {
 		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
 		containerList.put(containerName, containerRef);
 
-//		//create the container1	
-//		containerName="container1";
-//		pContainer = new ProfileImpl(null, 8888, null);
-//		System.out.println("Launching container "+pContainer);
-//		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
-//		containerList.put(containerName, containerRef);
-//
-//		//create the container2	
-//		containerName="container2";
-//		pContainer = new ProfileImpl(null, 8888, null);
-//		System.out.println("Launching container "+pContainer);
-//		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
-//		containerList.put(containerName, containerRef);
+		//		//create the container1	
+		//		containerName="container1";
+		//		pContainer = new ProfileImpl(null, 8888, null);
+		//		System.out.println("Launching container "+pContainer);
+		//		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
+		//		containerList.put(containerName, containerRef);
+		//
+		//		//create the container2	
+		//		containerName="container2";
+		//		pContainer = new ProfileImpl(null, 8888, null);
+		//		System.out.println("Launching container "+pContainer);
+		//		containerRef = rt.createAgentContainer(pContainer); //ContainerController replace AgentContainer in the new versions of Jade.
+		//		containerList.put(containerName, containerRef);
 
 		System.out.println("Launching containers done");
 		return containerList;
@@ -167,7 +214,7 @@ public class Principal {
 
 
 	}
-	
+
 	/**********************************************
 	 * 
 	 * Methods used to create the agents and to start them
@@ -198,9 +245,9 @@ public class Principal {
 		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
-		
+
 		c = containerList.get("container0");
-		
+
 		agentName="Player2";
 		try {
 
@@ -237,5 +284,5 @@ public class Principal {
 		}
 		System.out.println("Agents started...");
 	}
-	
+
 }

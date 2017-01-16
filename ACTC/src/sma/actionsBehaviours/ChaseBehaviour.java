@@ -18,8 +18,8 @@ public class ChaseBehaviour extends SecureTickerBehaviour {
 	
 	@Override
 	void Tick() {
-		//System.out.println("Tick ChaseBehaviour");
 		AbstractAgent him = ((AbstractAgent)this.myAgent);
+		 if (Principal.printDebug) System.out.println("Tick ChaseBehaviour "+him.getLocalName());
 		Vector3f currentpos  = him.getCurrentPosition();
 		Vector3f dest = him.getDestination();
 		

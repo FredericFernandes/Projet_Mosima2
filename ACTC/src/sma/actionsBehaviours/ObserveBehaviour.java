@@ -6,6 +6,7 @@ import sma.agents.SmartAgent;
 import com.jme3.math.Vector3f;
 
 import env.jme.Situation;
+import princ.Principal;
 
 public class ObserveBehaviour extends SecureTickerBehaviour {
 
@@ -23,14 +24,17 @@ public class ObserveBehaviour extends SecureTickerBehaviour {
 	@Override
 	protected void Tick() {
 
-		System.out.println("--------------------------");
-		System.out.println("Tick ObserveBehaviour");
-
+		
 		SmartAgent agent = ((SmartAgent) this.myAgent);
+		 if (Principal.printDebug){
+			 System.out.println("--------------------------");
+			 System.out.println("Tick ObserveBehaviour "+agent.getLocalName());
+		 }
+		
 		Vector3f currentpos = agent.getCurrentPosition();
 		Vector3f dest = agent.getDestination();
 		Situation situation = agent.observeMap();
-
+		if(situation==null) return;
 		// Si la liste des agents à portée de vue est non nulle
 		if (situation.agents.size() != 0) {
 

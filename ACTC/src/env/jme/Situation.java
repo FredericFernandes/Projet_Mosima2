@@ -16,7 +16,7 @@ import sma.actionsBehaviours.LegalActions.LegalAction;
  */
 public class Situation {
 	public int fieldOfViewLimit;
-	public String direction;
+	//public String direction;
 	public LegalAction lastAction;
 //	public Vector3f supAltitude;
 	public Vector3f agentAltitude;
@@ -55,5 +55,14 @@ public class Situation {
 		this.consistency = consistency;
 		this.agents = agents;
 	}
+
+	@Override
+	public String toString() {
+		return "Situation [fieldOfViewLimit=" + fieldOfViewLimit + "\n, lastAction=" + lastAction + "\n, agentAltitude="
+				+ agentAltitude + "\n, minAltitude=" + minAltitude + "\n, maxAltitude=" + maxAltitude + "\n, avgAltitude="
+				+ avgAltitude + "\n, fieldOfView=" + fieldOfView + "\n, maxDepth=" + maxDepth + "\n, consistency="
+				+ consistency + "\n, agents=" + agents + "]";
+	}
+	
 	
 }

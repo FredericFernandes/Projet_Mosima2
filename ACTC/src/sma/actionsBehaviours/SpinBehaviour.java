@@ -5,6 +5,7 @@ import sma.AbstractAgent;
 import sma.actionsBehaviours.LegalActions.LegalAction;
 import sma.agents.SmartAgent;
 import env.jme.Situation;
+import princ.Principal;
 
 public class SpinBehaviour extends SecureOneShotBehaviour {
 
@@ -24,19 +25,19 @@ public class SpinBehaviour extends SecureOneShotBehaviour {
 
 	@Override
 	public void oneAction() {
-		System.out.println("Tick SpinBehaviour");
+		 if (Principal.printDebug) System.out.println("Tick SpinBehaviour");
 		SmartAgent ag = ((SmartAgent)this.myAgent);
 		
 		ag.lookAt(LegalAction.values()[9]);
 		Situation highest = ag.observeMap();
-		
+		if(highest==null)return;
 		Situation s;
 		int i = -1;
 		for(i = 9; i < 17 ; i++){
 			ag.lookAt(LegalAction.values()[i]);
 			
 			s = ag.observeMap();
-			
+			if(s==null)return;
 			if(s.agents.size() != 0){
 				String nameEnemy = s.agents.get(0).getSecond(); 
 				if(ag.realEnv.isVisible(ag.getLocalName(), nameEnemy))

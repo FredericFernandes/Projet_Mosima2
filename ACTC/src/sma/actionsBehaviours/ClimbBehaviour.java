@@ -6,6 +6,7 @@ import java.util.Random;
 import com.jme3.math.Vector3f;
 
 import env.jme.Situation;
+import princ.Principal;
 import sma.AbstractAgent;
 import sma.actionsBehaviours.LegalActions.LegalAction;
 import sma.agents.SmartAgent;
@@ -26,10 +27,11 @@ public class ClimbBehaviour extends SecureOneShotBehaviour {
 
 	@Override
 	public void oneAction() {
-		System.out.println("Tick ClimbBehaviour");
-		
 		SmartAgent agent= ((SmartAgent)this.myAgent);
+		 if (Principal.printDebug) System.out.println("Tick ClimbBehaviour "+agent.getLocalName());
+		
 		Situation s = agent.observeMap();
+		if(s==null)return;
 		// Si on a atteint le point d'altitude maximum et qu'on est en patrouille, on patrouille
 		if(agent.patrol > 0){
 			agent.justOnTop = true;

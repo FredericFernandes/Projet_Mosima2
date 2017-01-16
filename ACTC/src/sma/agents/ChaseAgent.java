@@ -19,7 +19,7 @@ public class ChaseAgent extends AbstractAgent {
 	
 	protected void setup(){
 
-			super.setup();			
+			super.setup();	
 			//get the parameters given into the object[]. In the current case, the environment where the agent will evolve
 			final Object[] args = getArguments();
 			if(args[0]!=null && args[1]!=null){

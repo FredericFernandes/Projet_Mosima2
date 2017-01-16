@@ -145,7 +145,6 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	}
 	
 	public void initStartPostion(){
-		System.out.println("initStartPostion");
 		startPostion = realEnv.getPostionsStart().get(getLocalName());
 	}
 
@@ -159,6 +158,10 @@ public class AbstractAgent extends Agent implements EnvironmentManager {
 	
 	public int getEnemyHP(){
 		return realEnv.getHP("Player 2");
+	}
+
+	public String getEnemy() {
+		return enemy;
 	}
 	
 }

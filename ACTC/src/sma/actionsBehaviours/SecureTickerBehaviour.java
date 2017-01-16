@@ -20,10 +20,13 @@ public abstract class SecureTickerBehaviour extends TickerBehaviour {
 	@Override
 	protected void onTick() {
 			AbstractAgent ag = ((AbstractAgent)this.myAgent);
-			if(ag.realEnv.isDead(ag.getLocalName()))
-				stop();  // On stop le Behaviour si l'agent est mort
+			if((ag.realEnv.isDead(ag.getLocalName())) || (ag.realEnv.isDead(ag.getEnemy()))){
+				stop();  // On stop le Behaviour si un des deux agents est mort
+				this.myAgent.doDelete();
+			}
+			
 			if(!ag.realEnv.isPaused()){
-				Tick(); // Si le jeu a commencé 
+				Tick(); // Si le jeu n'est pas en pause 
 			}
 
 	}

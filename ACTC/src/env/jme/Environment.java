@@ -1,5 +1,6 @@
 package env.jme;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,16 +46,21 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.system.AppSettings;
 import com.jme3.terrain.geomipmap.TerrainLodControl;
 import com.jme3.terrain.geomipmap.TerrainPatch;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import com.jme3.util.BufferUtils;
 import com.jme3.util.SkyFactory;
 
 import app.CustomSimpleApplication;
 import dataStructures.tuple.Tuple2;
 import env.terrain.TerrainTools;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
+import learning.AttWriter;
 import princ.Principal;
 import sma.AbstractAgent;
 import sma.actionsBehaviours.LegalActions;
@@ -92,8 +98,9 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 
 	//private HashMap<String, Geometry> marks = new HashMap<String, Geometry>();
 
-	private final int VIEW_SHOOTABLE = 75;
-	private final int VIEW_DISTANCE = 75;
+	private final int VIEW_SHOOTABLE = 100;
+	private final int VIEW_DISTANCE = 100;
+
 	private final int LIFE = 9;
 	private final int DAMAGE = 3;
 	private static float yOffsetMAP = 0;
@@ -103,104 +110,96 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	private AnimChannel channel;
 	private AnimControl control;
 
-	/**
-	 * Launches the given file's heightmap.
-	 * -warning- the heightmap file must be a txt file, using the following syntaxe :
-	 * 
-	 * sizeoftheheightmap
-	 * int:int:int:.....:int
-	 * int:int:int:.....:int
-	 * ...
-	 * int:int:int:.....:int
-	 * 
-	 * 
-	 * - each int is a integer representing the height of one position of the map.
-	 * - the size of the heightmap must be a power of two (ex: 64,128,..).
-	 * 
-	 * @param filename name of the file containing the heightmap
-	 * @return the created environment
-	 */
-	public static Environment launch(String filename){
+
+	public void launchNormalMap(Tuple2<Integer, float[]> map ){
 		yOffsetMAP = 0.0f;
-		Environment  env = new Environment(filename);
-		//SimpleApplication app = env;
-		env.start();
-
-		return env;
+		this.config(map);
 	}
 
-	/**
-	 * Generates and launches a random heightmap of the given size.
-	 * - the size of the heightmap must be a power of two (ex: 64,128,..).
-	 * @param size size of the heightmap
-	 * @return the created environment
-	 */
-	public static Environment launchRandom(int size) {
+	public void launchPerlinMap(Tuple2<Integer, float[]> map) {
 		yOffsetMAP = -200f;
-		Environment env = new Environment(size);
-		//SimpleApplication app = env;
-		env.start();
-		return env;
+		this.config(map);
 	}
 
-
-	/**
-	 * Constructor, which implements the heightmap by random generation.
-	 * @param size
-	 */
-	public Environment(int size) {
-		super();
-		//		this.heightmap_tuplet =  TerrainTools.getRandomMap(size);
-		//		for (int i=0; i<heightmap_tuplet.getFirst()*heightmap_tuplet.getFirst(); i++)  System.out.println(heightmap_tuplet.getSecond()[i]);
-		this.heightmap_tuplet =  TerrainTools.getPerlinAlgoMap(size);
-		bulletAppState = new BulletAppState();
-		bulletAppState.setSpeed(0.2f);
+	private void config(Tuple2<Integer, float[]> map){
+		this.heightmap_tuplet = map;
+		this.bulletAppState = new BulletAppState(); // enable physics
+		this.bulletAppState.setSpeed(0.2f);
+		AppSettings mySetting = new AppSettings(true);
+		mySetting.setResolution(860, 600);
+		//mySetting.setResolution(1024, 768);
+		mySetting.setFullscreen(false);
+		this.setSettings(mySetting);
+		this.setShowSettings(false);
+		this.start();
 	}
+
+	//	/**
+	//	 * Constructor, which implements the heightmap by random generation.
+	//	 * @param size
+	//	 */
+	//	public Environment(int size) {
+	//		super();
+	//		//		this.heightmap_tuplet =  TerrainTools.getRandomMap(size);
+	//		//		for (int i=0; i<heightmap_tuplet.getFirst()*heightmap_tuplet.getFirst(); i++)  System.out.println(heightmap_tuplet.getSecond()[i]);
+	//
+	//	}
 
 	/**
 	 * Constructor, which implements the heightmap using a file.
 	 * @param filename
 	 */
-	public Environment(String filename){
+	public Environment(){
 		super();
-		this.heightmap_tuplet = TerrainTools.getHeightMapFromTxt(filename);
-		bulletAppState = new BulletAppState(); // enable physics
-		bulletAppState.setSpeed(0.2f);
+	}
+
+	public void stop(){
+		super.stop();
+		for(final AgentController ac: Principal.agentList){
+			try {
+				ac.kill();
+			} catch (StaleProxyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		System.out.println("Nb Win : "+Principal.nbWin);
 	}
 
 	@Override
 	public void simpleInitApp() {
+
+		stateManager.attach(bulletAppState);
+
+
+		bulletNode = new Node("bullet");
+		shootables = new Node("shootables");
+		notshootables= new Node("notshootables");
+
+		arrows = new Node("arrows");
+
+		rootNode.attachChild(bulletNode);
+		rootNode.attachChild(shootables);
+		rootNode.attachChild(notshootables);
+		rootNode.attachChild(arrows);
+
+		cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
+		cam.setLocation(new Vector3f(0.0f, 75.0f, 75.0f));
+		cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
+
+		flyCam.setMoveSpeed(150);
+		//flyCam.setEnabled(false);
+
+		makeTerrain();
+		//initKeys();
+		//listArrow = new ArrayList<Geometry>();
+		//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
+		//		arrow.setLineWidth(10); // make arrow thicker
+		//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
+
+		rootNode.attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
 		synchronized(this){
-			stateManager.attach(bulletAppState);
-
-
-			bulletNode = new Node("bullet");
-			shootables = new Node("shootables");
-			notshootables= new Node("notshootables");
-
-			arrows = new Node("arrows");
-
-			rootNode.attachChild(bulletNode);
-			rootNode.attachChild(shootables);
-			rootNode.attachChild(notshootables);
-			rootNode.attachChild(arrows);
-
-			cam.setViewPort(0.0f, 1.0f, 0.4f, 1.0f);
-			cam.setLocation(new Vector3f(0.0f, 250.0f, 75.0f));
-			cam.lookAtDirection(new Vector3f(-0.0016761336f, -0.9035275f, -0.42852688f), new Vector3f(-0.003530928f, 0.4285301f, -0.9035206f));
-
-			flyCam.setMoveSpeed(150);
-			//flyCam.setEnabled(false);
-
-			makeTerrain();
-			//initKeys();
-			//listArrow = new ArrayList<Geometry>();
-			//		Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(2));
-			//		arrow.setLineWidth(10); // make arrow thicker
-			//		putShape("arrow",arrow, ColorRGBA.Green).setLocalTranslation(cam.getLocation());
-
-			rootNode.attachChild(SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false));
-
 			/***
 			 * NOW JMonkey is ready for Jade 
 			 */
@@ -282,11 +281,13 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		/** 6. Add physics: */
 
 		terrain.addControl(new RigidBodyControl(0));
-		getPhysicsSpace().add(terrain.getControl(RigidBodyControl.class));
+		PhysicsSpace sp =   getPhysicsSpace();
+		sp.add(terrain.getControl(RigidBodyControl.class));
 
 		//	    terrainNode.attachChild(terrain);
 		shootables.attachChild(terrain);
 	}
+
 
 
 	/**
@@ -296,17 +297,16 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @return true if the agent is deployed, false if an agent with this name already exists.
 	 */
 	public synchronized boolean deployAgent(String agentName, String playertype) {
-		//System.out.println("start deployAgent" );
 		if (this.players.containsKey(agentName)) {
 			System.out.println("DeployAgent Error : A player with the name '"+agentName+"' already exists.");
 			//			System.exit(0);
 			return false;
 		}
 		else {
-			int val = terrain.getTerrainSize()-20;
+			int val = terrain.getTerrainSize()-50;
 			if(playertype.equals("player"))
 				val=-val;
-			Vector3f startPostion = new Vector3f(val,255.0f,val);
+			Vector3f startPostion = new Vector3f(val,5.0f,val);
 			postionsStart = new HashMap<String, Vector3f>();
 			postionsStart.put(agentName, startPostion);
 			SphereCollisionShape capsuleShape = new SphereCollisionShape(2);
@@ -320,23 +320,24 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 			physicsPlayer.setPhysicsLocation(startPostion);
 
 			// we make the function wait 1 seconds for letting the objets be created before.
-			//						try {
-			//							wait(2000);
 			//						} catch (InterruptedException e) {
 			//							// TODO Auto-generated catch block
 			//							e.printStackTrace();
 			//						}
 
 			getPhysicsSpace().add(physicsPlayer);
-			Spatial player = (Spatial) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+			Node node =  (Node) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+			Geometry player = (Geometry) node.getChild(0);
+
 
 			//Box b  = new Box(2, 2, 2);
-			//Geometry player = new Geometry("Box", b);
-			//player.setModelBound(new BoundingBox());
-			player.setLocalTranslation(startPostion);
-			player.setLocalScale(0.20f);
+			//Geometry player = new Geometry("Box",b);
 
-			control = player.getControl(AnimControl.class);
+			player.setModelBound(new BoundingBox());
+			player.setLocalTranslation(startPostion);
+			player.setLocalScale(0.25f);
+
+			control = node.getControl(AnimControl.class);
 			control.addListener(this);
 			channel = control.createChannel();		
 			channel.setAnim("Walk", 0.50f);
@@ -344,8 +345,8 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 
 			channel.setSpeed(1f);
 
-			//player.updateModelBound();
-			//player.updateGeometricState();
+			player.updateModelBound();
+			player.updateGeometricState();
 			//			Spatial player = assetManager.loadModel("Models/Test/BasicCubeLow.obj");
 			Material mat;
 			mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -430,49 +431,55 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @param direction cardinal-direction N, NE, E, SE, S, SW, W, NW.
 	 */
 	public synchronized void lookAt(String agent, LegalAction direction) {
-		if (players.containsKey(agent)) {
-			Spatial player = players.get(agent);
-			Camera cam = ((Camera)players.get(agent).getUserData("cam"));
-			Vector3f currentPosition = new Vector3f(0,0,0);
-			switch (direction) {
-			case LOOKTO_NORTH :
-				currentPosition.setZ(currentPosition.z-30);
-				break;
-			case LOOKTO_NORTHEAST:
-				currentPosition.setZ(currentPosition.z-30);
-				currentPosition.setX(currentPosition.x+30);
-				break;
-			case LOOKTO_EAST:
-				currentPosition.setX(currentPosition.x+30);
-				break;
-			case LOOKTO_SOUTHEAST:
-				currentPosition.setZ(currentPosition.z+30);
-				currentPosition.setX(currentPosition.x+30);
-				break;
-			case LOOKTO_SOUTH:
-				currentPosition.setZ(currentPosition.z+30);
-				break;
-			case LOOKTO_SOUTHWEST:
-				currentPosition.setZ(currentPosition.z+30);
-				currentPosition.setX(currentPosition.x-30);
-				break;
-			case LOOKTO_WEST:
-				currentPosition.setX(currentPosition.x-30);
-				break;
-			case LOOKTO_NORTHWEST:
-				currentPosition.setZ(currentPosition.z-30);
-				currentPosition.setX(currentPosition.x-30);
-				break;
-			default:
-				System.out.println("Error, no compatible action");
-				System.exit(-1);
-			}
-			player.getControl(PlayerControl.class).setViewDirection(currentPosition);
-			cam.setLocation(player.getWorldTranslation());
-			cam.lookAtDirection(currentPosition, Vector3f.UNIT_Y);
-			this.lastActions.put(agent, direction);
-
+		if (!players.containsKey(agent))  return;
+		Spatial player;
+		Camera cam;
+		synchronized(players){
+			player = players.get(agent);
+			cam = ((Camera)players.get(agent).getUserData("cam"));
 		}
+
+
+		Vector3f currentPosition = new Vector3f(0,0,0);
+		switch (direction) {
+		case LOOKTO_NORTH :
+			currentPosition.setZ(currentPosition.z-30);
+			break;
+		case LOOKTO_NORTHEAST:
+			currentPosition.setZ(currentPosition.z-30);
+			currentPosition.setX(currentPosition.x+30);
+			break;
+		case LOOKTO_EAST:
+			currentPosition.setX(currentPosition.x+30);
+			break;
+		case LOOKTO_SOUTHEAST:
+			currentPosition.setZ(currentPosition.z+30);
+			currentPosition.setX(currentPosition.x+30);
+			break;
+		case LOOKTO_SOUTH:
+			currentPosition.setZ(currentPosition.z+30);
+			break;
+		case LOOKTO_SOUTHWEST:
+			currentPosition.setZ(currentPosition.z+30);
+			currentPosition.setX(currentPosition.x-30);
+			break;
+		case LOOKTO_WEST:
+			currentPosition.setX(currentPosition.x-30);
+			break;
+		case LOOKTO_NORTHWEST:
+			currentPosition.setZ(currentPosition.z-30);
+			currentPosition.setX(currentPosition.x-30);
+			break;
+		default:
+			System.out.println("Error, no compatible action");
+			System.exit(-1);
+		}
+		player.getControl(PlayerControl.class).setViewDirection(currentPosition);
+		cam.setLocation(player.getWorldTranslation());
+		cam.lookAtDirection(currentPosition, Vector3f.UNIT_Y);
+		this.lastActions.put(agent, direction);
+
+
 	}
 
 
@@ -561,6 +568,8 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 */
 	public synchronized boolean cardinalMove(String agent, LegalAction direction) {
 		int max = heightmap_tuplet.getFirst()-(heightmap_tuplet.getFirst()%10);
+		Spatial player =  players.get(agent);
+		if (player ==null) return false;
 		Vector3f position = players.get(agent).getWorldTranslation().clone();
 		lookAt(agent, LegalActions.MoveToLook(direction));
 		boolean res = true;
@@ -627,9 +636,9 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @param enemy the name of the target agent.
 	 * @return true if the shooting has succeeded, false if the enemy doesn't exist or if the shooting has failed.
 	 */
-	public boolean shoot(String agent, String enemy) {
+	public synchronized boolean shoot(String agent, String enemy) {
 		if (players.containsKey(agent) && players.containsKey(enemy)) {
-
+			System.out.println("shoot()");
 			Vector3f origin = getCurrentPosition(agent);
 			Vector3f target = getCurrentPosition(enemy);
 			Vector3f dir = target.subtract(origin).normalize();
@@ -646,7 +655,8 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 				//				System.out.println("target: "+players.get(enemy).getWorldTranslation());
 				this.lastActions.put(agent, LegalAction.SHOOT);
 				Random r = new Random();
-				if (r.nextFloat()<0.7) {
+				if (r.nextFloat()<0.7) 
+				{
 					players.get(agent).getControl(PlayerControl.class).setViewDirection(dir);
 					Spatial bullet = getBullet();
 					bullet.setLocalTranslation(origin);
@@ -665,6 +675,9 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 					int enemyLife = ((int)players.get(enemy).getUserData("life"))-DAMAGE;
 					if (enemyLife<=0) {
 						System.out.println(enemy+" killed.");
+						String other = (enemy.equals("Player1"))? "Player2" : "Player1";
+						Situation lastSituation = observe2(other,10);
+
 						explode(target);
 						synchronized (shootables) {
 							Principal.lockUpdate.lock();
@@ -676,7 +689,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 						}
 						//rootNode.detachChild(marks.get(agent));
 						players.remove(enemy);
-						resetSimulation();
+						resetSimulation(other,lastSituation);
 					}
 					else {
 						players.get(enemy).setUserData("life", enemyLife);
@@ -699,7 +712,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @param enemy the name of the target agent.
 	 * @return true if the enemy is visible, false if not.
 	 */
-	public boolean isVisibleForShoot(String agent, String enemy) {
+	public synchronized boolean isVisibleForShoot(String agent, String enemy) {
 		Vector3f origin = getCurrentPosition(agent);
 		Vector3f target = getCurrentPosition(enemy);
 		Vector3f dir = target.subtract(origin).normalize();
@@ -719,9 +732,12 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 				}
 			}	
 
-			if (results.size()>1) {
-				CollisionResult closest = results.getCollision(1);
-				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
+			if (results.size()>0) {
+				//CollisionResult closest = results.getCollision(1);
+				CollisionResult closest = results.getClosestCollision();
+				boolean isNear =  approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation());
+				boolean isEnemy = closest.getGeometry().equals(players.get(enemy));
+				if (isNear && isEnemy ) {
 					if (origin.distance(target)<=VIEW_SHOOTABLE) {
 						return true;
 					}
@@ -730,7 +746,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		}
 		return false;
 	}
-	public boolean isVisible(String agent, String enemy) {
+	public synchronized boolean isVisible(String agent, String enemy) {
 		Vector3f origin = getCurrentPosition(agent);
 		Vector3f target = getCurrentPosition(enemy);
 		if (target==null || origin==null){
@@ -755,9 +771,12 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 				}
 			}	
 
-			if (results.size()>1) {
-				CollisionResult closest = results.getCollision(1);
-				if ( approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation())) {
+			if (results.size()>0) {
+				//CollisionResult closest = results.getCollision(1);
+				CollisionResult closest = results.getClosestCollision();
+				boolean isNear =  approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation());
+				boolean isEnemy = closest.getGeometry().equals(players.get(enemy));
+				if ( isNear && isEnemy ) {
 					if (origin.distance(target)<=VIEW_DISTANCE) {
 						return true;
 					}
@@ -776,7 +795,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @param yOffset
 	 * @return the coordinates of the contact point, null if there isn't any contact.
 	 */
-	private Vector3f intersects(String ag, Camera camera, final float xOffset, final float yOffset) {
+	private synchronized Vector3f intersects(String ag, Camera camera, final float xOffset, final float yOffset) {
 		final Vector3f point = players.get(ag).getWorldTranslation().clone();
 		final Vector3f direction = camera.getDirection().clone();
 		point.setX(point.getX() + xOffset);
@@ -820,13 +839,20 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	}
 
 
-	private Vector3f intersects2(String ag, Camera camera, final float angleOffset, final float yOffset, final float rayon) {
+	private synchronized Vector3f intersects2(String ag, Camera camera, final float angleOffset, final float yOffset, final float rayon) {
+		float angle = 0.0f;
+		Vector3f point;
+		Vector3f direction;
+		synchronized (players) {
+			if(players.get(ag)==null) return null;
+			point = players.get(ag).getWorldTranslation().clone();
+			direction = camera.getDirection().clone();
 
-		final Vector3f point = players.get(ag).getWorldTranslation().clone();
-		final Vector3f direction = camera.getDirection().clone();
+			angle = -1 * players.get(ag).getLocalRotation().toAngles(new float[3])[1]
+					+ (float)Math.toRadians(angleOffset) - (float)Math.toRadians(90);
+		}
 
-		float angle = -1 * players.get(ag).getLocalRotation().toAngles(new float[3])[1]
-				+ (float)Math.toRadians(angleOffset) - (float)Math.toRadians(90);
+
 		float cos = (float)Math.cos(angle);
 		float sin = (float)Math.sin(angle);
 		direction.setX(direction.getX() - rayon * cos);
@@ -885,7 +911,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	 * @param rayDistance the distance between each ray tracing.
 	 * @return an instance of the Situation class.
 	 */
-	public Situation observe(String ag, int rayDistance) {
+	public synchronized Situation observe(String ag, int rayDistance) {
 		Camera camera = ((Camera)players.get(ag).getUserData("cam"));
 		Vector3f agentPos = players.get(ag).getWorldTranslation();
 		float highest = yOffsetMAP;
@@ -971,9 +997,16 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 	}
 
 
-	public Situation observe2(String ag, int rayDistance) {
-		Camera camera = ((Camera)players.get(ag).getUserData("cam"));
-		Vector3f agentPos = players.get(ag).getWorldTranslation();
+	public synchronized Situation observe2(String ag, int rayDistance) {
+		Camera camera;
+		Vector3f agentPos;
+		synchronized (players) {
+			if(players.get(ag)==null)
+				return null;
+			camera = ((Camera)players.get(ag).getUserData("cam"));
+			agentPos = players.get(ag).getWorldTranslation();
+		}
+
 		float highest = yOffsetMAP;
 		Vector3f highestPosition = null;
 		float lowest = 255;
@@ -1030,6 +1063,7 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		//				System.out.println("maxDepth : "+maxDepth);
 		//				System.out.println("Consistency : "+heights.size()*1./nb);
 		//				System.out.println("\n");
+
 		return new Situation(VIEW_SHOOTABLE,(LegalAction)players.get(ag).getUserData("lastAction"), agentPos, lowestPosition, highestPosition, sum/nb, nb, maxDepth, heights.size()*1./nb, observeAgents(ag));
 	}
 
@@ -1081,29 +1115,38 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		List<Tuple2<Vector3f, String>> res = new ArrayList();
 
 		Vector3f agentPosition = getCurrentPosition(agentName);
-		for (String enemy : players.keySet()) {
-			Vector3f enemyPosition = getCurrentPosition(enemy);
-			Vector3f dir = enemyPosition.subtract(agentPosition).normalize();
+		synchronized (players) {
+			if(players.size()==0) return null;
+			for (String enemy : players.keySet()) 
+			{
+				Vector3f enemyPosition = getCurrentPosition(enemy);
+				Vector3f dir = enemyPosition.subtract(agentPosition).normalize();
 
-			Ray ray = new Ray(agentPosition, dir);
-			ray.setLimit(VIEW_DISTANCE);
-			CollisionResults results = new CollisionResults();
-			synchronized (shootables) {
-				Principal.lockUpdate.lock();
-				try {
-					shootables.collideWith(ray, results);
-				} finally {
-					Principal.lockUpdate.unlock();
-				}
-			}	
-			
-			if (results.size()>1) {
-				CollisionResult closest = results.getCollision(1);
-				if (agentPosition.distance(enemyPosition)<=VIEW_DISTANCE && closest.getGeometry().equals(players.get(enemy))) {
-					res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
+				Ray ray = new Ray(agentPosition, dir);
+				ray.setLimit(VIEW_DISTANCE);
+				CollisionResults results = new CollisionResults();
+				synchronized (shootables) {
+					Principal.lockUpdate.lock();
+					try {
+						shootables.collideWith(ray, results);
+					} finally {
+						Principal.lockUpdate.unlock();
+					}
+				}	
+
+				if (results.size()>0) {
+					CollisionResult closest = results.getClosestCollision();
+
+					boolean isNear =  approximativeEqualsCoordinates(closest.getGeometry().getWorldTranslation(), players.get(enemy).getWorldTranslation());
+					boolean isEnemy = closest.getGeometry().equals(players.get(enemy));
+
+					if (agentPosition.distance(enemyPosition)<=VIEW_DISTANCE && isEnemy && isNear ) {
+						res.add(new Tuple2<Vector3f, String>(enemyPosition, enemy));
+					}
 				}
 			}
 		}
+		
 		return res;
 	}
 
@@ -1295,8 +1338,26 @@ public class Environment extends CustomSimpleApplication  implements AnimEventLi
 		return (agentLife<=0);
 	}
 
-	private void resetSimulation() {
+	private void resetSimulation(String other, Situation lastSituation) {
 		System.out.println("Reset de la simulation");
+		System.out.println("Winner : " + other);
+		try {
+			if(other.equals("Player1")){
+				Principal.nbWin++;
+				AttWriter.writeArff(lastSituation);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		synchronized(this){
+			/***
+			 * NOW Reset the Simulation 
+			 */
+			this.restart();
+			this.notify();
+		}
 
 	}
 

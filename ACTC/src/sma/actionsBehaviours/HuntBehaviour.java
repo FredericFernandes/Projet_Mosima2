@@ -7,6 +7,7 @@ import env.jme.PlayerControl;
 import env.jme.Situation;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import princ.Principal;
 import sma.AbstractAgent;
 import sma.agents.SmartAgent;
 
@@ -25,11 +26,11 @@ public class HuntBehaviour extends SecureOneShotBehaviour {
 
 	@Override
 	public void oneAction() {
-		System.out.println("Tick HuntBehaviour");
-		
 		SmartAgent agent= ((SmartAgent)this.myAgent);
-		Situation s = agent.observeMap();
+		 if (Principal.printDebug)System.out.println("Tick HuntBehaviour "+agent.getLocalName());
 		
+		Situation s = agent.observeMap();
+		if(s==null)return;
 		String nameEnemy = "";
 		if(s.agents.size() != 0)
 			nameEnemy = s.agents.get(0).getSecond(); 

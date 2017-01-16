@@ -14,13 +14,18 @@ public abstract class SecureOneShotBehaviour extends OneShotBehaviour {
 
 	@Override
 	public void action() {
-			AbstractAgent ag = ((AbstractAgent)this.myAgent);	
-			if(!ag.realEnv.isDead(ag.getLocalName())) { 
-				// On execute le Behaviour que si l'agent est en vie
-				if(!ag.realEnv.isPaused()){
-					oneAction(); // Si le jeu a commencé 
-				}	
-			}
+		AbstractAgent ag = ((AbstractAgent)this.myAgent);	
+		if((ag.realEnv.isDead(ag.getLocalName())) || (ag.realEnv.isDead(ag.getEnemy()))){
+			this.myAgent.doDelete();
+			return;  // On stop le Behaviour si un des deux agents est mort
+		}
+			
+
+		// On execute le Behaviour que si l'agent est en vie
+		if(!ag.realEnv.isPaused()){
+			oneAction(); // Si le jeu n'est pas en pause 
+		}	
+
 	}
 
 	abstract void oneAction();
